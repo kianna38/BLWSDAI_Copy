@@ -1,7 +1,9 @@
 using BLWSDAI.Models.DTOs;
 using BLWSDAI.Services;
 using BLWSDAI.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MimeKit;
 
 namespace BLWSDAI.Controllers
 {
@@ -9,19 +11,30 @@ namespace BLWSDAI.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly IUserService _service;
-        public UsersController(IUserService service)
+        private readonly IUserService _service; 
+        private readonly JwtService _jwtService;
+
+        public UsersController(IUserService service, JwtService jwtService)
         {
             _service = service;
+            _jwtService = jwtService;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserReadDto>>> GetAll()
+        public async Task<ActionResult<PaginatedResponse<UserReadDto>>> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
         {
-            var users = await _service.GetAllAsync();
-            return Ok(users);
+            return Ok(await _service.GetAllAsync(page, pageSize));
         }
 
+        [Authorize(Roles = "Admin")]
+        [HttpPost("filter")]
+        public async Task<ActionResult<PaginatedResponse<UserReadDto>>> Filter([FromBody] UserFilterDto filter)
+        {
+            return Ok(await _service.FilterAsync(filter));
+        }
+
+
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<ActionResult<UserReadDto>> GetById(int id)
         {
@@ -30,13 +43,14 @@ namespace BLWSDAI.Controllers
             return Ok(user);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<UserReadDto>> Create(UserCreateDto dto)
         {
             try
             {
                 var created = await _service.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = created.UserId }, created);
+                return CreatedAtAction(nameof(GetById), new { id = created.UserId }, created);
             }
             catch (Exception ex)
             {
@@ -45,6 +59,7 @@ namespace BLWSDAI.Controllers
         }
         }
 
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, UserCreateDto dto)
         {
@@ -59,12 +74,14 @@ namespace BLWSDAI.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             var result = await _service.DeleteAsync(id);
             return result ? NoContent() : NotFound();
         }
+
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] UserLoginDto dto)
@@ -73,7 +90,39 @@ namespace BLWSDAI.Controllers
             if (user == null)
                 return Unauthorized(new { message = "Invalid email or password." });
 
-            return Ok(user);
+            // Generate JWT
+            var token = _jwtService.GenerateToken(user.UserId, user.Email, user.Role);
+
+            // Return token + user
+            return Ok(new
+            {
+                token,
+                user
+            });
+        }
+
+
+
+        [Authorize]
+        [HttpPost("logout")]
+        public IActionResult Logout()
+        {
+            //localStorage.removeItem("token"); // or wherever you store the JWT
+            //axios.post("/api/users/logout", { }, {
+            //headers: { Authorization: `Bearer ${ token}` }
+            //});
+            //window.location.href = "/login"; // redirect
+            return Ok(new { message = "Logged out successfully." });
+        }
+
+
+        [Authorize]
+        [HttpPost("{id}/logs")]
+        public async Task<ActionResult<PaginatedResponse<UserLogDto>>> GetUserLogs(int id, [FromBody] UserLogFilterDto filter)
+        {
+            filter.UserId = id; // Ensure the userId from route is used
+            var logs = await _service.GetUserLogsAsync(filter);
+            return Ok(logs);
         }
 
     }

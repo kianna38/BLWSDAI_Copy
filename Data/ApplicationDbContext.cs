@@ -17,6 +17,8 @@ namespace BLWSDAI.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Payment> Payments { get; set; }
         public DbSet<SalaryInfo> SalaryInfos { get; set; }
+        public DbSet<RatesInfo> RatesInfo { get; set; }
+        public DbSet<OtherExpense> OtherExpenses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -32,12 +34,16 @@ namespace BLWSDAI.Data
 
 
             // Composite Unique Constraints & Field Constraints
+            modelBuilder.Entity<OtherExpense>()
+                .HasKey(e => e.ExpenseId);
+
+
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
                 .IsUnique();
 
             modelBuilder.Entity<Consumer>()
-                .HasIndex(c => c.MeterSerial)
+                .HasIndex(c => c.MeterNumber)
                 .IsUnique();
 
 
@@ -65,10 +71,6 @@ namespace BLWSDAI.Data
                 t.HasCheckConstraint("CK_Payment_AmountPaid_Positive", "amount_paid >= 0");
             });
 
-            modelBuilder.Entity<SalaryInfo>().ToTable(t =>
-            {
-                t.HasCheckConstraint("CK_SalaryInfo_SingleRow", "salary_info_id = 1");
-            });
         }
     }
 }

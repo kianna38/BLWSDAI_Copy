@@ -1,28 +1,39 @@
 using BLWSDAI.Models;
+using System.ComponentModel.DataAnnotations.Schema;
 
-public enum BillStatusEnum { Unpaid, Partial, Overdue, Paid }
-
-public class Bill
+namespace BLWSDAI.Models
 {
-    public int BillId { get; set; }
-    public int ConsumerId { get; set; }
-    public Consumer Consumer { get; set; } = null!;
-    public int ReadingId { get; set; }
-    public Reading Reading { get; set; } = null!;
-    public int? MotherMeterReadingId { get; set; }
-    public MotherMeterReading? MotherMeterReading { get; set; }
 
-    public DateTime MonthYear { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime DueDate { get; set; }
+    public enum BillStatusEnum { Unpaid, Partial, Overdue, Paid }
 
-    public decimal SystemLoss { get; set; }
-    public decimal Subsidy { get; set; }
-    public decimal Penalty { get; set; }
-    public decimal Balance { get; set; }
-    public decimal TotalAmount { get; set; }
+    public class Bill
+    {
+        public int BillId { get; set; }
+        public int ConsumerId { get; set; }
+        public Consumer Consumer { get; set; } = null!;
+        public int ReadingId { get; set; }
+        public Reading Reading { get; set; } = null!;
+        public int? MotherMeterReadingId { get; set; }
+        public MotherMeterReading? MotherMeterReading { get; set; }
 
-    public BillStatusEnum Status { get; set; } = BillStatusEnum.Unpaid;
+        public DateTime MonthYear { get; set; }
+        public DateTime BillingDate { get; set; } = DateTime.UtcNow;
 
-    public List<Payment> Payments { get; set; } = new();
+        [Column(TypeName = "numeric(10,2)")]
+        public decimal SystemLoss { get; set; }
+
+        [Column(TypeName = "numeric(10,2)")]
+        public decimal Subsidy { get; set; }
+
+        [Column(TypeName = "numeric(10,2)")]
+        public decimal Balance { get; set; }
+
+        [Column(TypeName = "numeric(10,2)")]
+        public decimal TotalAmount { get; set; }
+        public BillStatusEnum Status { get; set; } = BillStatusEnum.Unpaid;
+        public string NotifStatus { get; set; } = null!;
+
+
+        public List<Payment> Payments { get; set; } = new();
+    }
 }

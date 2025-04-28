@@ -23,12 +23,85 @@ namespace BLWSDAI.Migrations
 
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "public", "bill_status_enum", new[] { "unpaid", "partial", "overdue", "paid" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "public", "consumer_status_enum", new[] { "active", "disconnected", "cut" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "public", "notif_pref_enum", new[] { "sms", "email", "sms_and_email", "none" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "public", "notif_pref_enum", new[] { "email", "sms", "sms_and_email", "none" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "public", "payment_type_enum", new[] { "cash", "gcash", "maya" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "public", "purok_enum", new[] { "_1", "_2", "_3", "_4", "_5" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "public", "user_role_enum", new[] { "admin", "staff" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "user_role_enum", new[] { "admin", "staff" });
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("BLWSDAI.Models.Bill", b =>
+                {
+                    b.Property<int>("BillId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("bill_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("BillId"));
+
+                    b.Property<decimal>("Balance")
+                        .HasColumnType("numeric(10,2)")
+                        .HasColumnName("balance");
+
+                    b.Property<DateTime>("BillingDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("billing_date");
+
+                    b.Property<int>("ConsumerId")
+                        .HasColumnType("integer")
+                        .HasColumnName("consumer_id");
+
+                    b.Property<DateTime>("MonthYear")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("month_year");
+
+                    b.Property<int?>("MotherMeterReadingId")
+                        .HasColumnType("integer")
+                        .HasColumnName("mother_meter_reading_id");
+
+                    b.Property<string>("NotifStatus")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("notif_status");
+
+                    b.Property<int>("ReadingId")
+                        .HasColumnType("integer")
+                        .HasColumnName("reading_id");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
+
+                    b.Property<decimal>("Subsidy")
+                        .HasColumnType("numeric(10,2)")
+                        .HasColumnName("subsidy");
+
+                    b.Property<decimal>("SystemLoss")
+                        .HasColumnType("numeric(10,2)")
+                        .HasColumnName("system_loss");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("numeric(10,2)")
+                        .HasColumnName("total_amount");
+
+                    b.HasKey("BillId")
+                        .HasName("pk_bills");
+
+                    b.HasIndex("MotherMeterReadingId")
+                        .HasDatabaseName("ix_bills_mother_meter_reading_id");
+
+                    b.HasIndex("ReadingId")
+                        .HasDatabaseName("ix_bills_reading_id");
+
+                    b.HasIndex("ConsumerId", "MonthYear")
+                        .IsUnique()
+                        .HasDatabaseName("ix_bills_consumer_id_month_year");
+
+                    b.ToTable("bills", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Bill_TotalAmount_Positive", "total_amount >= 0");
+                        });
+                });
 
             modelBuilder.Entity("BLWSDAI.Models.Consumer", b =>
                 {
@@ -43,6 +116,11 @@ namespace BLWSDAI.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("email");
+
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasColumnType("text")
@@ -53,10 +131,10 @@ namespace BLWSDAI.Migrations
                         .HasColumnType("text")
                         .HasColumnName("last_name");
 
-                    b.Property<string>("MeterSerial")
+                    b.Property<string>("MeterNumber")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("meter_serial");
+                        .HasColumnName("meter_number");
 
                     b.Property<string>("MiddleInitial")
                         .HasColumnType("text")
@@ -82,9 +160,9 @@ namespace BLWSDAI.Migrations
                     b.HasKey("ConsumerId")
                         .HasName("pk_consumers");
 
-                    b.HasIndex("MeterSerial")
+                    b.HasIndex("MeterNumber")
                         .IsUnique()
-                        .HasDatabaseName("ix_consumers_meter_serial");
+                        .HasDatabaseName("ix_consumers_meter_number");
 
                     b.ToTable("consumers", null, t =>
                         {
@@ -109,14 +187,53 @@ namespace BLWSDAI.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("month_year");
 
-                    b.Property<decimal>("Reading")
+                    b.Property<decimal>("PresentReading")
                         .HasColumnType("numeric")
-                        .HasColumnName("reading");
+                        .HasColumnName("present_reading");
+
+                    b.Property<decimal>("PreviousReading")
+                        .HasColumnType("numeric")
+                        .HasColumnName("previous_reading");
 
                     b.HasKey("MotherMeterReadingId")
                         .HasName("pk_mother_meter_readings");
 
                     b.ToTable("mother_meter_readings", (string)null);
+                });
+
+            modelBuilder.Entity("BLWSDAI.Models.OtherExpense", b =>
+                {
+                    b.Property<int>("ExpenseId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("expense_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ExpenseId"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(10,2)")
+                        .HasColumnName("amount");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("date");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("label");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("integer")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("ExpenseId")
+                        .HasName("pk_other_expenses");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_other_expenses_user_id");
+
+                    b.ToTable("other_expenses", (string)null);
                 });
 
             modelBuilder.Entity("BLWSDAI.Models.Payment", b =>
@@ -129,7 +246,7 @@ namespace BLWSDAI.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PaymentId"));
 
                     b.Property<decimal>("AmountPaid")
-                        .HasColumnType("numeric")
+                        .HasColumnType("numeric(10,2)")
                         .HasColumnName("amount_paid");
 
                     b.Property<int>("BillId")
@@ -147,6 +264,10 @@ namespace BLWSDAI.Migrations
                     b.Property<int>("PaymentType")
                         .HasColumnType("integer")
                         .HasColumnName("payment_type");
+
+                    b.Property<decimal>("Penalty")
+                        .HasColumnType("numeric(10,2)")
+                        .HasColumnName("penalty");
 
                     b.Property<int?>("UserId")
                         .HasColumnType("integer")
@@ -183,21 +304,21 @@ namespace BLWSDAI.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("consumer_id");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
                     b.Property<DateTime>("MonthYear")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("month_year");
 
                     b.Property<decimal>("PresentReading")
-                        .HasColumnType("numeric")
+                        .HasColumnType("numeric(10,2)")
                         .HasColumnName("present_reading");
 
                     b.Property<decimal>("PreviousReading")
-                        .HasColumnType("numeric")
+                        .HasColumnType("numeric(10,2)")
                         .HasColumnName("previous_reading");
+
+                    b.Property<DateTime>("ReadingDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("reading_date");
 
                     b.HasKey("ReadingId")
                         .HasName("pk_readings");
@@ -219,27 +340,27 @@ namespace BLWSDAI.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("SalaryInfoId"));
 
                     b.Property<decimal>("AuditorSalary")
-                        .HasColumnType("numeric")
+                        .HasColumnType("numeric(10,2)")
                         .HasColumnName("auditor_salary");
 
-                    b.Property<decimal>("Maintenance1Salary")
-                        .HasColumnType("numeric")
-                        .HasColumnName("maintenance1salary");
+                    b.Property<decimal>("MaintenanceOneSalary")
+                        .HasColumnType("numeric(10,2)")
+                        .HasColumnName("maintenance_one_salary");
 
-                    b.Property<decimal>("Maintenance2Salary")
-                        .HasColumnType("numeric")
-                        .HasColumnName("maintenance2salary");
+                    b.Property<decimal>("MaintenanceTwoSalary")
+                        .HasColumnType("numeric(10,2)")
+                        .HasColumnName("maintenance_two_salary");
 
                     b.Property<decimal>("PresidentSalary")
-                        .HasColumnType("numeric")
+                        .HasColumnType("numeric(10,2)")
                         .HasColumnName("president_salary");
 
                     b.Property<decimal>("SecretarySalary")
-                        .HasColumnType("numeric")
+                        .HasColumnType("numeric(10,2)")
                         .HasColumnName("secretary_salary");
 
                     b.Property<decimal>("TreasurerSalary")
-                        .HasColumnType("numeric")
+                        .HasColumnType("numeric(10,2)")
                         .HasColumnName("treasurer_salary");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -247,16 +368,13 @@ namespace BLWSDAI.Migrations
                         .HasColumnName("updated_at");
 
                     b.Property<decimal>("VicePresidentSalary")
-                        .HasColumnType("numeric")
+                        .HasColumnType("numeric(10,2)")
                         .HasColumnName("vice_president_salary");
 
                     b.HasKey("SalaryInfoId")
                         .HasName("pk_salary_infos");
 
-                    b.ToTable("salary_infos", null, t =>
-                        {
-                            t.HasCheckConstraint("CK_SalaryInfo_SingleRow", "salary_info_id = 1");
-                        });
+                    b.ToTable("salary_infos", (string)null);
                 });
 
             modelBuilder.Entity("BLWSDAI.Models.User", b =>
@@ -301,85 +419,82 @@ namespace BLWSDAI.Migrations
                     b.ToTable("users", (string)null);
                 });
 
-            modelBuilder.Entity("Bill", b =>
+            modelBuilder.Entity("RatesInfo", b =>
                 {
-                    b.Property<int>("BillId")
+                    b.Property<int>("RatesInfoId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
-                        .HasColumnName("bill_id");
+                        .HasColumnName("rates_info_id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("BillId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("RatesInfoId"));
 
-                    b.Property<decimal>("Balance")
-                        .HasColumnType("numeric")
-                        .HasColumnName("balance");
+                    b.Property<decimal>("ConsumerCubicMeterRate")
+                        .HasColumnType("numeric(10,2)")
+                        .HasColumnName("consumer_cubic_meter_rate");
 
-                    b.Property<int>("ConsumerId")
-                        .HasColumnType("integer")
-                        .HasColumnName("consumer_id");
+                    b.Property<decimal>("MotherMeterCubicMeterRate")
+                        .HasColumnType("numeric(10,2)")
+                        .HasColumnName("mother_meter_cubic_meter_rate");
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<decimal>("PenaltyRate")
+                        .HasColumnType("numeric(10,2)")
+                        .HasColumnName("penalty_rate");
+
+                    b.Property<decimal>("SubsidyRate")
+                        .HasColumnType("numeric(10,2)")
+                        .HasColumnName("subsidy_rate");
+
+                    b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnName("updated_at");
 
-                    b.Property<DateTime>("DueDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("due_date");
+                    b.HasKey("RatesInfoId")
+                        .HasName("pk_rates_info");
 
-                    b.Property<DateTime>("MonthYear")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("month_year");
+                    b.ToTable("rates_info", (string)null);
+                });
 
-                    b.Property<int?>("MotherMeterReadingId")
-                        .HasColumnType("integer")
-                        .HasColumnName("mother_meter_reading_id");
+            modelBuilder.Entity("BLWSDAI.Models.Bill", b =>
+                {
+                    b.HasOne("BLWSDAI.Models.Consumer", "Consumer")
+                        .WithMany("Bills")
+                        .HasForeignKey("ConsumerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_bills_consumers_consumer_id");
 
-                    b.Property<decimal>("Penalty")
-                        .HasColumnType("numeric")
-                        .HasColumnName("penalty");
+                    b.HasOne("BLWSDAI.Models.MotherMeterReading", "MotherMeterReading")
+                        .WithMany("Bills")
+                        .HasForeignKey("MotherMeterReadingId")
+                        .HasConstraintName("fk_bills_mother_meter_readings_mother_meter_reading_id");
 
-                    b.Property<int>("ReadingId")
-                        .HasColumnType("integer")
-                        .HasColumnName("reading_id");
+                    b.HasOne("BLWSDAI.Models.Reading", "Reading")
+                        .WithMany("Bills")
+                        .HasForeignKey("ReadingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_bills_readings_reading_id");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer")
-                        .HasColumnName("status");
+                    b.Navigation("Consumer");
 
-                    b.Property<decimal>("Subsidy")
-                        .HasColumnType("numeric")
-                        .HasColumnName("subsidy");
+                    b.Navigation("MotherMeterReading");
 
-                    b.Property<decimal>("SystemLoss")
-                        .HasColumnType("numeric")
-                        .HasColumnName("system_loss");
+                    b.Navigation("Reading");
+                });
 
-                    b.Property<decimal>("TotalAmount")
-                        .HasColumnType("numeric")
-                        .HasColumnName("total_amount");
+            modelBuilder.Entity("BLWSDAI.Models.OtherExpense", b =>
+                {
+                    b.HasOne("BLWSDAI.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .HasConstraintName("fk_other_expenses_users_user_id");
 
-                    b.HasKey("BillId")
-                        .HasName("pk_bills");
-
-                    b.HasIndex("MotherMeterReadingId")
-                        .HasDatabaseName("ix_bills_mother_meter_reading_id");
-
-                    b.HasIndex("ReadingId")
-                        .HasDatabaseName("ix_bills_reading_id");
-
-                    b.HasIndex("ConsumerId", "MonthYear")
-                        .IsUnique()
-                        .HasDatabaseName("ix_bills_consumer_id_month_year");
-
-                    b.ToTable("bills", null, t =>
-                        {
-                            t.HasCheckConstraint("CK_Bill_TotalAmount_Positive", "total_amount >= 0");
-                        });
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("BLWSDAI.Models.Payment", b =>
                 {
-                    b.HasOne("Bill", "Bill")
+                    b.HasOne("BLWSDAI.Models.Bill", "Bill")
                         .WithMany("Payments")
                         .HasForeignKey("BillId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -417,32 +532,9 @@ namespace BLWSDAI.Migrations
                     b.Navigation("Consumer");
                 });
 
-            modelBuilder.Entity("Bill", b =>
+            modelBuilder.Entity("BLWSDAI.Models.Bill", b =>
                 {
-                    b.HasOne("BLWSDAI.Models.Consumer", "Consumer")
-                        .WithMany("Bills")
-                        .HasForeignKey("ConsumerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_bills_consumers_consumer_id");
-
-                    b.HasOne("BLWSDAI.Models.MotherMeterReading", "MotherMeterReading")
-                        .WithMany("Bills")
-                        .HasForeignKey("MotherMeterReadingId")
-                        .HasConstraintName("fk_bills_mother_meter_readings_mother_meter_reading_id");
-
-                    b.HasOne("BLWSDAI.Models.Reading", "Reading")
-                        .WithMany("Bills")
-                        .HasForeignKey("ReadingId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_bills_readings_reading_id");
-
-                    b.Navigation("Consumer");
-
-                    b.Navigation("MotherMeterReading");
-
-                    b.Navigation("Reading");
+                    b.Navigation("Payments");
                 });
 
             modelBuilder.Entity("BLWSDAI.Models.Consumer", b =>
@@ -465,11 +557,6 @@ namespace BLWSDAI.Migrations
                 });
 
             modelBuilder.Entity("BLWSDAI.Models.User", b =>
-                {
-                    b.Navigation("Payments");
-                });
-
-            modelBuilder.Entity("Bill", b =>
                 {
                     b.Navigation("Payments");
                 });

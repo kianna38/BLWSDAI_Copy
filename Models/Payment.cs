@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BLWSDAI.Models
 {
@@ -14,7 +15,13 @@ namespace BLWSDAI.Models
         public int? UserId { get; set; }
         public User? User { get; set; }
 
+
         public DateTime PaymentDate { get; set; }
+
+        [Column(TypeName = "numeric(10,2)")]
+        public decimal Penalty { get; set; }
+
+        [Column(TypeName = "numeric(10,2)")]
         public decimal AmountPaid { get; set; }
         public PaymentTypeEnum PaymentType { get; set; }
     }

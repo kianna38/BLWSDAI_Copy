@@ -7,12 +7,142 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Summary\**" />
+    <Content Remove="Summary\**" />
+    <EmbeddedResource Remove="Summary\**" />
+    <None Remove="Summary\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="wwwroot\404.html" />
+    <Content Remove="wwwroot\admin.html" />
+    <Content Remove="wwwroot\admin.txt" />
+    <Content Remove="wwwroot\billings_payment.html" />
+    <Content Remove="wwwroot\billings_payment.txt" />
+    <Content Remove="wwwroot\consumers.html" />
+    <Content Remove="wwwroot\consumers.txt" />
+    <Content Remove="wwwroot\dashboard.html" />
+    <Content Remove="wwwroot\dashboard.txt" />
+    <Content Remove="wwwroot\favicon.ico" />
+    <Content Remove="wwwroot\file.svg" />
+    <Content Remove="wwwroot\globe.svg" />
+    <Content Remove="wwwroot\images\Admin.png" />
+    <Content Remove="wwwroot\images\BLWSDAI_logo.png" />
+    <Content Remove="wwwroot\images\login_bg.png" />
+    <Content Remove="wwwroot\images\Staff.png" />
+    <Content Remove="wwwroot\index.html" />
+    <Content Remove="wwwroot\index.txt" />
+    <Content Remove="wwwroot\next.svg" />
+    <Content Remove="wwwroot\profile.html" />
+    <Content Remove="wwwroot\profile.txt" />
+    <Content Remove="wwwroot\readings.html" />
+    <Content Remove="wwwroot\readings.txt" />
+    <Content Remove="wwwroot\report.html" />
+    <Content Remove="wwwroot\report.txt" />
+    <Content Remove="wwwroot\vercel.svg" />
+    <Content Remove="wwwroot\window.svg" />
+    <Content Remove="wwwroot\_next\static\bN4cCrDZrrFr_rnkoYmPL\_buildManifest.js" />
+    <Content Remove="wwwroot\_next\static\bN4cCrDZrrFr_rnkoYmPL\_ssgManifest.js" />
+    <Content Remove="wwwroot\_next\static\chunks\123-3042e163b2e6dcc6.js" />
+    <Content Remove="wwwroot\_next\static\chunks\246-7d2b4d7a310b6c46.js" />
+    <Content Remove="wwwroot\_next\static\chunks\253-ce7d967fd54220d0.js" />
+    <Content Remove="wwwroot\_next\static\chunks\280-5a4d8efcdaa9d440.js" />
+    <Content Remove="wwwroot\_next\static\chunks\341.df3329d77a5faa19.js" />
+    <Content Remove="wwwroot\_next\static\chunks\373-f0c5c3d505bc8636.js" />
+    <Content Remove="wwwroot\_next\static\chunks\472.a3826d29d6854395.js" />
+    <Content Remove="wwwroot\_next\static\chunks\4bd1b696-c697331d39ce1fae.js" />
+    <Content Remove="wwwroot\_next\static\chunks\684-281dc217d26c3b77.js" />
+    <Content Remove="wwwroot\_next\static\chunks\824-7c45defe95ebd524.js" />
+    <Content Remove="wwwroot\_next\static\chunks\app\(protected)\admin\page-a0a03b9bc1af138a.js" />
+    <Content Remove="wwwroot\_next\static\chunks\app\(protected)\billings_payment\page-246119da339d3374.js" />
+    <Content Remove="wwwroot\_next\static\chunks\app\(protected)\consumers\page-392d533d371f2a1d.js" />
+    <Content Remove="wwwroot\_next\static\chunks\app\(protected)\dashboard\page-4ac3f8a55fdb54d4.js" />
+    <Content Remove="wwwroot\_next\static\chunks\app\(protected)\layout-db9085cd70e24622.js" />
+    <Content Remove="wwwroot\_next\static\chunks\app\(protected)\profile\page-71c325fe37993363.js" />
+    <Content Remove="wwwroot\_next\static\chunks\app\(protected)\readings\page-1e84c71f72d8876a.js" />
+    <Content Remove="wwwroot\_next\static\chunks\app\(protected)\report\page-b3743e07ac07ab46.js" />
+    <Content Remove="wwwroot\_next\static\chunks\app\layout-08b03f233e7b792b.js" />
+    <Content Remove="wwwroot\_next\static\chunks\app\page-1b1e0a86264c1869.js" />
+    <Content Remove="wwwroot\_next\static\chunks\app\_not-found\page-64c6494a6bea2414.js" />
+    <Content Remove="wwwroot\_next\static\chunks\ca377847-91cdcf65540a2a6c.js" />
+    <Content Remove="wwwroot\_next\static\chunks\framework-f593a28cde54158e.js" />
+    <Content Remove="wwwroot\_next\static\chunks\main-app-f2cb92502dd8e9cc.js" />
+    <Content Remove="wwwroot\_next\static\chunks\main-c1f90a3fdf13ab74.js" />
+    <Content Remove="wwwroot\_next\static\chunks\pages\_app-92f2aae776f86b9c.js" />
+    <Content Remove="wwwroot\_next\static\chunks\pages\_error-71d2b6a7b832d02a.js" />
+    <Content Remove="wwwroot\_next\static\chunks\polyfills-42372ed130431b0a.js" />
+    <Content Remove="wwwroot\_next\static\chunks\webpack-f24413172d2dbc89.js" />
+    <Content Remove="wwwroot\_next\static\css\28a601fe7b9efe96.css" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="BLWSDAI.csproj.user" />
+    <None Include="wwwroot\404.html" />
+    <None Include="wwwroot\admin.html" />
+    <None Include="wwwroot\admin.txt" />
+    <None Include="wwwroot\billings_payment.html" />
+    <None Include="wwwroot\billings_payment.txt" />
+    <None Include="wwwroot\consumers.html" />
+    <None Include="wwwroot\consumers.txt" />
+    <None Include="wwwroot\dashboard.html" />
+    <None Include="wwwroot\dashboard.txt" />
+    <None Include="wwwroot\favicon.ico" />
+    <None Include="wwwroot\file.svg" />
+    <None Include="wwwroot\globe.svg" />
+    <None Include="wwwroot\images\Admin.png" />
+    <None Include="wwwroot\images\BLWSDAI_logo.png" />
+    <None Include="wwwroot\images\login_bg.png" />
+    <None Include="wwwroot\images\Staff.png" />
+    <None Include="wwwroot\index.html" />
+    <None Include="wwwroot\index.txt" />
+    <None Include="wwwroot\next.svg" />
+    <None Include="wwwroot\profile.html" />
+    <None Include="wwwroot\profile.txt" />
+    <None Include="wwwroot\readings.html" />
+    <None Include="wwwroot\readings.txt" />
+    <None Include="wwwroot\report.html" />
+    <None Include="wwwroot\report.txt" />
+    <None Include="wwwroot\vercel.svg" />
+    <None Include="wwwroot\window.svg" />
+    <None Include="wwwroot\_next\static\bN4cCrDZrrFr_rnkoYmPL\_buildManifest.js" />
+    <None Include="wwwroot\_next\static\bN4cCrDZrrFr_rnkoYmPL\_ssgManifest.js" />
+    <None Include="wwwroot\_next\static\chunks\123-3042e163b2e6dcc6.js" />
+    <None Include="wwwroot\_next\static\chunks\246-7d2b4d7a310b6c46.js" />
+    <None Include="wwwroot\_next\static\chunks\253-ce7d967fd54220d0.js" />
+    <None Include="wwwroot\_next\static\chunks\280-5a4d8efcdaa9d440.js" />
+    <None Include="wwwroot\_next\static\chunks\341.df3329d77a5faa19.js" />
+    <None Include="wwwroot\_next\static\chunks\373-f0c5c3d505bc8636.js" />
+    <None Include="wwwroot\_next\static\chunks\472.a3826d29d6854395.js" />
+    <None Include="wwwroot\_next\static\chunks\4bd1b696-c697331d39ce1fae.js" />
+    <None Include="wwwroot\_next\static\chunks\684-281dc217d26c3b77.js" />
+    <None Include="wwwroot\_next\static\chunks\824-7c45defe95ebd524.js" />
+    <None Include="wwwroot\_next\static\chunks\app\(protected)\admin\page-a0a03b9bc1af138a.js" />
+    <None Include="wwwroot\_next\static\chunks\app\(protected)\billings_payment\page-246119da339d3374.js" />
+    <None Include="wwwroot\_next\static\chunks\app\(protected)\consumers\page-392d533d371f2a1d.js" />
+    <None Include="wwwroot\_next\static\chunks\app\(protected)\dashboard\page-4ac3f8a55fdb54d4.js" />
+    <None Include="wwwroot\_next\static\chunks\app\(protected)\layout-db9085cd70e24622.js" />
+    <None Include="wwwroot\_next\static\chunks\app\(protected)\profile\page-71c325fe37993363.js" />
+    <None Include="wwwroot\_next\static\chunks\app\(protected)\readings\page-1e84c71f72d8876a.js" />
+    <None Include="wwwroot\_next\static\chunks\app\(protected)\report\page-b3743e07ac07ab46.js" />
+    <None Include="wwwroot\_next\static\chunks\app\layout-08b03f233e7b792b.js" />
+    <None Include="wwwroot\_next\static\chunks\app\page-1b1e0a86264c1869.js" />
+    <None Include="wwwroot\_next\static\chunks\app\_not-found\page-64c6494a6bea2414.js" />
+    <None Include="wwwroot\_next\static\chunks\ca377847-91cdcf65540a2a6c.js" />
+    <None Include="wwwroot\_next\static\chunks\framework-f593a28cde54158e.js" />
+    <None Include="wwwroot\_next\static\chunks\main-app-f2cb92502dd8e9cc.js" />
+    <None Include="wwwroot\_next\static\chunks\main-c1f90a3fdf13ab74.js" />
+    <None Include="wwwroot\_next\static\chunks\pages\_app-92f2aae776f86b9c.js" />
+    <None Include="wwwroot\_next\static\chunks\pages\_error-71d2b6a7b832d02a.js" />
+    <None Include="wwwroot\_next\static\chunks\polyfills-42372ed130431b0a.js" />
+    <None Include="wwwroot\_next\static\chunks\webpack-f24413172d2dbc89.js" />
+    <None Include="wwwroot\_next\static\css\28a601fe7b9efe96.css" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="EFCore.NamingConventions" Version="9.0.0" />
+    <PackageReference Include="MailKit" Version="4.11.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.4">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
