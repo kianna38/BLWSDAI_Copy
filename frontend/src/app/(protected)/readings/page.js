@@ -9,6 +9,8 @@ import { PencilIcon, PlusIcon, FunnelIcon, MagnifyingGlassIcon, ChevronLeftIcon,
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';  // Fetch search params (consumerId)
 import { Combobox } from '@headlessui/react';
+import ToastModal from '@/components/modals/ToastModal';
+
 export default function ReadingsPage() {
     const today = new Date();
     const initialMonthYear = `${today.getFullYear()} ${today.toLocaleString('default', { month: 'long' })}`;
@@ -27,6 +29,8 @@ export default function ReadingsPage() {
     const [editingReadingId, setEditingReadingId] = useState(null);
     const [editingPresentReading, setEditingPresentReading] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
+    const [isToastOpen, setIsToastOpen] = useState(false);
+    const [toastConfig, setToastConfig] = useState({ type: 'success', message: '' });
 
     const { generateBillsMutation } = useGenerateBills();
     const { createUpdateReadingMutation } = useCreateUpdateMotherMeterReading();
@@ -120,16 +124,27 @@ export default function ReadingsPage() {
 
 
     // Extract available months from the fetched readings
-    const availableMonths = readingsQuery?.data?.map((reading) => {
-        const monthYear = new Date(reading.monthYear);
-        const year = monthYear.getFullYear();
-        const month = monthYear.toLocaleString('default', { month: 'long' }); // Full month name like January, February, etc.
-        return `${year} ${month}`;
-    }) || [];
+    const availableMonths = readingsQuery?.data
+        ?.filter((reading) => {
+            const monthYear = new Date(reading.monthYear);
+            const now = new Date();
 
+            // Only include months that are before or the same as today
+            return (
+                monthYear.getFullYear() < now.getFullYear() ||
+                (monthYear.getFullYear() === now.getFullYear() && monthYear.getMonth() <= now.getMonth())
+            );
+        })
+        .map((reading) => {
+            const monthYear = new Date(reading.monthYear);
+            const year = monthYear.getFullYear();
+            const month = monthYear.toLocaleString('default', { month: 'long' }); // Full month name
+            return `${year} ${month}`;
+        }) || [];
 
     // Remove duplicates
     const uniqueAvailableMonths = [...new Set(availableMonths)];
+
 
     // Extract necessary data from queries
     const { totalConsumerReading, billGenerated, numOfActiveConsumers, numOfReadings, sumOfPresentReading, sumOfPreviousReading } = readingSummaryQuery.data;
@@ -171,7 +186,11 @@ export default function ReadingsPage() {
 
     const handleSubmitCreateReading = () => {
         if (!selectedConsumerId || !inputPresentReading) {
-            alert('Please select a consumer and enter present reading.');
+            setToastConfig({
+                type: 'error',
+                message: 'Please select a consumer and enter present reading.'
+            });
+            setIsToastOpen(true);
             return;
         }
 
@@ -189,29 +208,44 @@ export default function ReadingsPage() {
             monthYear: monthYearDate.toISOString(),
         };
 
-
         createReadingMutation.mutate(readingDetails, {
             onSuccess: (data) => {
                 console.log('Success data:', data);
                 if (data) {
-                    alert('Reading created successfully!');
+                    setToastConfig({
+                        type: 'success',
+                        message: 'Reading created successfully!'
+                    });
+                    setIsToastOpen(true);
                     setIsAddReadingOpen(false);
                     setSelectedConsumerId('');
                     setInputPresentReading('');
                 } else {
-                    alert('Something went wrong even though server replied.'); // Safe fallback
+                    setToastConfig({
+                        type: 'error',
+                        message: 'Something went wrong even though server replied.'
+                    });
+                    setIsToastOpen(true);
                 }
             },
             onError: (error) => {
                 console.error('Mutation Error:', error);
-                alert('Error creating reading');
+                setToastConfig({
+                    type: 'error',
+                    message: 'Error creating reading'
+                });
+                setIsToastOpen(true);
             },
         });
     };
 
     const handleSubmitUpdateReading = () => {
         if (!editingReadingId || !editingPresentReading) {
-            alert('Missing data for update.');
+            setToastConfig({
+                type: 'error',
+                message: 'Missing data for update.'
+            });
+            setIsToastOpen(true);
             return;
         }
 
@@ -223,14 +257,22 @@ export default function ReadingsPage() {
             { readingId: editingReadingId, updatedReadingData: updatedData },
             {
                 onSuccess: () => {
-                    alert('Reading updated successfully!');
+                    setToastConfig({
+                        type: 'success',
+                        message: 'Reading updated successfully!'
+                    });
+                    setIsToastOpen(true);
                     setIsEditReadingOpen(false);
                     setEditingReadingId(null);
                     setEditingPresentReading('');
                 },
                 onError: (error) => {
                     console.error('Error updating reading:', error);
-                    alert('Error updating reading.');
+                    setToastConfig({
+                        type: 'error',
+                        message: 'Error updating reading.'
+                    });
+                    setIsToastOpen(true);
                 }
             }
         );
@@ -239,7 +281,11 @@ export default function ReadingsPage() {
 
     const handleSubmitMotherMeterReading = () => {
         if (!motherMeterPresentReading) {
-            alert('Please enter a present reading.');
+            setToastConfig({
+                type: 'error',
+                message: 'Please enter a present reading.'
+            });
+            setIsToastOpen(true);
             return;
         }
 
@@ -260,20 +306,32 @@ export default function ReadingsPage() {
         createUpdateReadingMutation.mutate(payload, {
             onSuccess: (data) => {
                 console.log('Mother Meter Success:', data);
-                alert('Mother meter reading created/updated!');
+                setToastConfig({
+                    type: 'success',
+                    message: 'Mother meter reading created/updated!'
+                });
+                setIsToastOpen(true);
                 setIsMotherMeterOpen(false);
                 setMotherMeterPresentReading('');
             },
             onError: (error) => {
                 console.error('Mother Meter Error:', error);
-                alert('Error updating mother meter reading.');
+                setToastConfig({
+                    type: 'error',
+                    message: 'Error updating mother meter reading.'
+                });
+                setIsToastOpen(true);
             },
         });
     };
 
     const handleClickGenerateBill = () => {
         if (motherMeterReading.presentReading < totalConsumerReading) {
-            alert("Mother Meter Reading cannot be lower than Total Consumer Readings!");
+            setToastConfig({
+                type: 'error',
+                message: 'Mother Meter Reading cannot be lower than Total Consumer Readings!'
+            });
+            setIsToastOpen(true);
             return;
         }
 
@@ -291,12 +349,20 @@ export default function ReadingsPage() {
         generateBillsMutation.mutate(payload, {
             onSuccess: (data) => {
                 setIsGenerating(false);   // Hide modal manually after success
-                alert('Bills successfully generated!');
+                setToastConfig({
+                    type: 'success',
+                    message: 'Bills successfully generated!'
+                });
+                setIsToastOpen(true);
             },
             onError: (error) => {
                 setIsGenerating(false);   // Hide modal manually after error
                 console.error('Bills Generation:', error);
-                alert('Error generating Bills.');
+                setToastConfig({
+                    type: 'error',
+                    message: 'Error generating Bills.'
+                });
+                setIsToastOpen(true);
             },
         });
     };
@@ -316,6 +382,9 @@ export default function ReadingsPage() {
     };
 
 
+    console.log(consumerData);
+
+
     return (
         <div className="bg-slate-100 text-black min-h-screen">
             {/* Header Section */}
@@ -323,7 +392,7 @@ export default function ReadingsPage() {
                 <h1 className="text-2xl font-bold pl-2">Readings</h1>
             </div>
 
-            <div className="flex flex-col md:flex-row md:space-y-0 space-y-5 m-5 items-center justify-between mb-10">
+            <div className="flex flex-col md:flex-row md:space-y-0 space-y-5 m-5 items-center justify-between mb-5">
                 
                 <div> 
                     <label htmlFor="monthYear" className="text-lg font-semibold">Date</label>
@@ -340,59 +409,49 @@ export default function ReadingsPage() {
                         ))}
                     </select>
                 </div>
-                {billGenerated && selectedMonthYear != initialMonthYear ?                    
-                    <div className="flex justify-between items-center px-4">
-                        <div className="">
-                            <button
-                                className="justify-center bg-blue-500 text-white px-4 py-1 rounded-lg hover:bg-blue-700 flex items-center gap-2"
-                                onClick={() => setIsMotherMeterOpen(true)}
-                            >
-                                <PlusIcon className="w-4 h-5 text-white" /> Add Mother Meter Reading
-                            </button>
-                        </div>
-                    </div>
-                : <div> </div>
-                }
             </div>
-
-            
-            <div className="flex md:flex-row flex-col md:space-y-0 space-y-10 justify-between items-center space-x-4 max-w-3xl mx-auto">
+   
+            <div className="flex flex-col sm:flex-row gap-10 mb-0 pt-0 pb-10 px-8">
                
                 <div className="flex flex-col items-center bg-white py-6 w-2/3 px-1 md:w-1/3 rounded-lg shadow space-y-1">
                     <div className="flex">
-                        <p className="font-semibold">Mother Meter Reading</p>
+                        <p className="text-sm text-center text-gray-500 mb-2">Mother Meter Reading</p>
                         {billGenerated ?
                             <div> </div>
                         :
                             <button onClick={() => setIsMotherMeterOpen(true)}>
-                                <PencilIcon className="w-4 h-5 text-blue-500" />
+                                <PencilIcon className="w-4 h-5 text-[#fb8500]" />
                             </button>
                         }
 
                     </div>
-                    <div className="text-xl font-bold text-teal-400">
+                    <hr className="w-full border-t border-gray-300 my-2" />
+
+                    <div className="text-xl font-bold text-[#023047]">
                         {motherMeterReading?.reading || 'N/A'} m³
                     </div>
                     <div className="text-sm text-cyan-500">{motherMeterReading.presentReading} m³ - {motherMeterReading.previousReading} m³</div>
 
                 </div>
                 <div className="flex flex-col items-center bg-white py-6 w-2/3 md:w-1/3 rounded-lg shadow space-y-1">
-                        <p className="font-semibold">Total Consumer Readings</p>
-                        <div className="text-xl font-bold text-teal-400">{totalConsumerReading} m³</div>
+                    <p className="text-sm text-center text-gray-500 mb-2">Total Consumer Readings</p>
+                    <hr className="w-full border-t border-gray-300 my-2" />
+                    <div className="text-xl font-bold text-[#023047]">{totalConsumerReading} m³</div>
                         <div className="text-sm text-cyan-500">{sumOfPresentReading} m³ - {sumOfPreviousReading} m³</div>
                 </div>
                 {/* Generate Bills Button */}
                 {billGenerated ? 
                     <div className="flex flex-col items-center bg-white py-6 w-2/3 md:w-1/3 rounded-lg shadow space-y-1">
-                        <p className="font-semibold">Base System Loss</p>
-                        <div className="text-xl font-bold text-teal-400">₱{baseSystemLoss.baseSystemLoss}</div>
+                        <p className="text-sm text-center text-gray-500 mb-2">Base System Loss</p>
+                        <hr className="w-full border-t border-gray-300 my-2" />
+                        <div className="text-xl font-bold text-[#023047]">₱{baseSystemLoss.baseSystemLoss}</div>
                         <div className="text-sm text-cyan-500">(( {baseSystemLoss.motherUsed} m³ - {baseSystemLoss.consumerUsed} m³) * {baseSystemLoss.motherRate} m³ ) / {baseSystemLoss.consumerUsed} m³</div>
                     </div>
                     :
                     <div className="flex justify-between items-center  px-4">
                         <button
                             onClick={() => handleClickGenerateBill()}
-                            className={`py-2 px-4 rounded-md text-white ${billGenerated ? 'bg-gray-400' : 'bg-red-600'} disabled:cursor-not-allowed`}
+                            className={`py-2 px-4 rounded-md text-white ${billGenerated ? 'bg-gray-400' : 'bg-[#023047]'} disabled:cursor-not-allowed`}
                             disabled={numOfReadings != numOfActiveConsumers || generateBillsMutation.isLoading}
                         >
                             {generateBillsMutation.isLoading ? 'Generating...' : `Generate Bills (${numOfReadings}/${numOfActiveConsumers})`}
@@ -404,15 +463,15 @@ export default function ReadingsPage() {
             
 
             {/* Consumer Readings Table */}
-            <div className="flex flex-col p-6 space-y-6">
-                <div className="flex flex-col justify-between items-center mt-12 mb-4 md:flex-row">
+            <div className="flex flex-col pt-4 px-4 md:px-8 pb-10 space-y-5 border border-gray-300 rounded-md bg-white shadow-sm mx-4 md:mx-8">
+                <div className="flex flex-col justify-between items-center mt-0 mb-4 md:flex-row pt-">
                     {/* Add Reading Button */}
                     {billGenerated ?
                         <div></div>
                     :
                         <div className=" ml-0 md:ml-4 mb-5 md:mb-0">
                             <button
-                                className="justify-center bg-blue-500 text-white px-4 py-1 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+                                className="justify-center  bg-[#fb8500] text-white px-4 py-1 rounded-lg hover:bg-blue-700 flex items-center gap-2"
                                 onClick={() => setIsAddReadingOpen(true)}
                             >
                                 <PlusIcon className="w-4 h-5 text-white" /> Add Reading
@@ -421,23 +480,23 @@ export default function ReadingsPage() {
                     }
                     <div className="flex justify-end space-x-5 items-center mb-2">
                         <div className="relative">
-                            <MagnifyingGlassIcon className="absolute left-2 top-2.5 w-5 h-5 text-cyan-400" />
+                            <MagnifyingGlassIcon className="absolute left-2 top-2.5 w-5 h-5 text-[#023047]" />
                             <input
                                 type="text"
                                 placeholder="Search Purok or Name"
-                                className="placeholder:text-sm pl-8 bg-cyan-50 p-2 rounded shadow"
+                                className="pl-8 bg-[#e5e5e5] p-2 rounded shadow"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
                     </div>
                 </div>
-                <div className="bg-cyan-50 rounded-lg  w-full overflow-x-auto shadow-sm">
+                <div className="bg-white shadow-sm rounded-lg overflow-hidden">
 
                     <table className="w-full text-sm text-left text-slate-700">
 
 
-                        <thead className="bg-cyan-100 text-gray-500">
+                        <thead className="bg-[#e5e5e5] text-gray-500 font-medium">
                             <tr className="text-center">
 
                                 {/* Purok */}
@@ -551,7 +610,7 @@ export default function ReadingsPage() {
                                 <tr
                                     key={index}
                                     onClick={billGenerated ? () => handleRowClick(consumer.consumerId, reading.monthYear) : undefined}
-                                    className={`border-t border-b border-cyan-200 text-center ${billGenerated ? "hover:bg-cyan-200 cursor-pointer" : "opacity-50"
+                                    className={`border-t border-b border-[#e5e5e5] hover:bg-cyan-200 text-center ${billGenerated ? "hover:bg-cyan-200 cursor-pointer" : "opacity-50"
                                         }`}
                                 >
 
@@ -611,7 +670,7 @@ export default function ReadingsPage() {
             </div>
 
             {isAddReadingOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                <div className="fixed inset-0 bg-slate-500/50 flex justify-center items-center z-50">
                     <div className="bg-white p-6 rounded-lg w-full max-w-md">
                         <h2 className="text-xl font-bold mb-4 text-center">Add New Reading</h2>
                         {/* Search Input */}
@@ -758,8 +817,12 @@ export default function ReadingsPage() {
                 </div>
             )}
 
-
-
+            <ToastModal
+                isOpen={isToastOpen}
+                onClose={() => setIsToastOpen(false)}
+                type={toastConfig.type}
+                message={toastConfig.message}
+            />
         </div>
     );
 }

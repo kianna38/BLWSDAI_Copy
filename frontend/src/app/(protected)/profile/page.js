@@ -75,127 +75,153 @@ export default function ProfilePage() {
 
     // Render loading state for user data and logs
     if (userLoading || logsLoading) {
-        return <div>Loading...</div>;
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#fb8500]"></div>
+            </div>
+        );
     }
 
-
     return (
-        <div className="bg-slate-100 text-black min-h-screen">
-            <div className="flex p-2 bg-white shadow-inner justify-between items-start">
-                <h1 className="text-2xl font-bold pl-2">Profile</h1>
-            </div>
-
-            <div className="flex flex-col p-6">
-                <div className="flex items-end justify-end">
-                    <button
-                        className="justify-center bg-blue-500 text-white px-4 py-1 rounded-lg hover:bg-blue-700 flex items-center gap-2"
-                        onClick={() => setModalOpen(true)}
-                    >
-                        <PencilIcon className="w-4 h-5 text-white" /> Edit Profile
-                    </button>
-                </div>
-
-                <div className="flex items-center justify-center mt-6">
-                    <img
-                        src={`images/${user?.role || 'staff'}.png`}
-                        alt="Avatar"
-                        className="w-24 h-24 rounded-full mr-6"
-                    />
-                    <div>
-                        <p className="text-xl font-semibold">{user?.name}</p>
-                        <p className="text-sm text-gray-600">{user?.email}</p>
-                        <p className="uppercase text-black font-bold mt-1">{user?.role}</p>
+        <div className="bg-slate-50 min-h-screen">
+            <div className="max-w-7xl mx-auto px-5 sm:px-5 lg:px-5 py-5">
+                {/* Header */}
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-8">
+                    <div className="flex justify-between items-center">
+                        <h1 className="text-3xl font-extrabold text-[#023047]">Profile</h1>
+                        <button
+                            className="bg-[#fb8500] text-white px-4 py-2 rounded-lg hover:bg-[#fb8500]/90 transition-colors flex items-center gap-2"
+                            onClick={() => setModalOpen(true)}
+                        >
+                            <PencilIcon className="w-5 h-5" />
+                           
+                        </button>
                     </div>
                 </div>
 
-                <div>
-                    <div className="flex flex-col justify-between items-center mt-12 mb-4 md:flex-row">
-                        <h2 className="text-xl text-slate-600 font-bold ml-4 mb-5 md:mb-0">Your Logs</h2>
-
-                        <div className="flex justify-end space-x-5 items-center mb-2">
-                            <div className="relative">
-                                <MagnifyingGlassIcon className="absolute left-2 top-2.5 w-5 h-5 text-cyan-400" />
-                                <input
-                                    type="text"
-                                    placeholder="Search"
-                                    className="pl-8 bg-cyan-50 p-2 rounded shadow"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                />
+                {/* Profile Card */}
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-8">
+                    <div className="flex flex-col md:flex-row items-center gap-8">
+                        <div className="relative">
+                            <img
+                                src={`images/${user?.role?.toLowerCase() || 'staff'}.png`}
+                                alt="Avatar"
+                                className="w-32 h-32 rounded-full border-4 border-[#fb8500] shadow-lg"
+                            />
+                            <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-[#fb8500] text-white px-4 py-1 rounded-full text-sm font-medium">
+                                {user?.role}
+                            </div>
+                        </div>
+                        <div className="text-center md:text-left">
+                            <h2 className="text-2xl font-bold text-[#023047] mb-2">{user?.name}</h2>
+                            <p className="text-gray-600 mb-4">{user?.email}</p>
+                            <div className="flex flex-wrap gap-4 justify-center md:justify-start">
+                                <div className="bg-slate-50 px-4 py-2 rounded-lg">
+                                    <p className="text-sm text-gray-500">User ID</p>
+                                    <p className="font-semibold text-[#023047]">{user?.userId}</p>
+                                </div>
+                                <div className="bg-slate-50 px-4 py-2 rounded-lg">
+                                    <p className="text-sm text-gray-500">Role</p>
+                                    <p className="font-semibold text-[#023047]">{user?.role}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <div className="bg-cyan-50 rounded-lg overflow-hidden shadow-sm">
-                        <table className="w-full text-sm text-left text-slate-700 table-fixed">
-                            <thead className="bg-cyan-100 uppercase text-gray-500 font-medium">
-                                <tr>
-                                    <th className="p-3 w-1/4 text-center">Process</th>
-                                    <th
-                                        className="p-3 w-1/4 text-center cursor-pointer select-none"
+                {/* Activity Logs */}
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                        <h2 className="text-2xl font-bold text-[#023047]">Activity Logs</h2>
+                        <div className="relative w-full md:w-64">
+                            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Search logs..."
+                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fb8500] focus:border-transparent"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead>
+                                <tr className="bg-slate-50">
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Process</th>
+                                    <th 
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
                                         onClick={handleDateSort}
                                     >
-                                        <div className="flex items-center justify-center space-x-1">
-                                            <span>Date</span>
+                                        <div className="flex items-center gap-1">
+                                            Date
                                             {internalSortDir === 'asc' ? (
-                                                <ChevronUpIcon className="w-4 h-4 inline  text-blue-500" />
+                                                <ChevronUpIcon className="w-4 h-4 text-[#fb8500]" />
                                             ) : (
-                                                <ChevronDownIcon className="w-4 h-4 inline text-blue-500" />
+                                                <ChevronDownIcon className="w-4 h-4 text-[#fb8500]" />
                                             )}
                                         </div>
                                     </th>
-
-
-                                    <th className="p-3 w-2/4 text-center">Details</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="divide-y divide-gray-200">
                                 {filteredLogs.length ? (
                                     filteredLogs.map((log, idx) => (
                                         <tr
                                             key={`${log.process}-${log.processID}-${idx}`}
                                             onClick={log.process === "Payment" ? () => handleRowClick(log.processID, log.date) : undefined}
-                                            className={`border-t border-b border-cyan-200 ${log.process === "Payment" ? "hover:bg-cyan-200 cursor-pointer" : ""}`}
+                                            className={`hover:bg-slate-50 transition-colors ${log.process === "Payment" ? "cursor-pointer" : ""}`}
                                         >
-                                            <td className="p-3 text-center font-semibold">{log.process}</td>
-                                            <td className="p-3 text-center">{new Date(log.date).toLocaleDateString()}</td>
-                                            <td className="p-3 text-center">{log.details}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <span className="px-3 py-1 rounded-full text-sm font-medium bg-[#fb8500]/10 text-[#fb8500]">
+                                                    {log.process}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                                {new Date(log.date).toLocaleDateString()}
+                                            </td>
+                                            <td className="px-6 py-4 text-sm text-gray-600">
+                                                {log.details}
+                                            </td>
                                         </tr>
-
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan={3} className="text-center py-4">No logs found</td>
+                                        <td colSpan={3} className="px-6 py-4 text-center text-gray-500">
+                                            No logs found
+                                        </td>
                                     </tr>
                                 )}
                             </tbody>
                         </table>
+                    </div>
 
-                        <div className="p-4 flex justify-end space-x-5 items-center text-sm text-gray-600">
-                            <div>
-                                Rows per page: {filter.PageSize} | {start}-{end} of {total}
-                            </div>
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={() => setFilter((prev) => ({ ...prev, Page: prev.Page - 1 }))}
-                                    disabled={filter.Page <= 1}
-                                    className="px-3 py-1 border rounded disabled:opacity-30"
-                                >
-                                    <ChevronLeftIcon className="w-5 h-5" />
-                                </button>
-                                <button
-                                    onClick={() => setFilter((prev) => ({ ...prev, Page: prev.Page + 1 }))}
-                                    disabled={filter.Page * filter.PageSize >= total}
-                                    className="px-3 py-1 border rounded disabled:opacity-30"
-                                >
-                                    <ChevronRightIcon className="w-5 h-5" />
-                                </button>
-                            </div>
+                    {/* Pagination */}
+                    <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200">
+                        <div className="text-sm text-gray-600">
+                            Showing {start}-{end} of {total} entries
+                        </div>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setFilter(prev => ({ ...prev, Page: prev.Page - 1 }))}
+                                disabled={filter.Page <= 1}
+                                className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                                <ChevronLeftIcon className="w-5 h-5" />
+                            </button>
+                            <button
+                                onClick={() => setFilter(prev => ({ ...prev, Page: prev.Page + 1 }))}
+                                disabled={filter.Page * filter.PageSize >= total}
+                                className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                                <ChevronRightIcon className="w-5 h-5" />
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
-
 
             {isModalOpen && (
                 <EditProfileModal

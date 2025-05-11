@@ -3,9 +3,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';  // Fetch search params (consumerId)
 import { useConsumerById, useFilterConsumerBills } from '@/hooks/useConsumer';  // Fetch consumer by ID
-import { PencilIcon, FunnelIcon, MagnifyingGlassIcon, ChevronLeftIcon, ChevronRightIcon, PlusIcon } from '@heroicons/react/24/solid';
+import { PencilIcon, FunnelIcon, MagnifyingGlassIcon, ChevronLeftIcon, ChevronRightIcon, PlusIcon, ArrowLeftIcon, PrinterIcon, ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import EditConsumerModal from '@/components/modals/EditConsumerModal'; // Modal component for adding a consumer
-import FilterConsumerBillsModal from '@/components/modals/FilterConsumersModal';
 import Link from 'next/link';
 import { formatDate } from '@/utils/formatDate';
 
@@ -15,6 +14,7 @@ const ConsumerDetailPage = () => {
     const router = useRouter();
 
     const [isEditModalOpen, setEditModalOpen] = useState(false);
+    const [isFilterModalOpen, setFilterModalOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [sortColumn, setSortColumn] = useState('monthYear');
     const [sortDirection, setSortDirection] = useState('asc');
@@ -90,148 +90,196 @@ const ConsumerDetailPage = () => {
         router.push(`/billings_payment/bill_pay/?consumerId=${consumerId}&monthYear=${monthYear}`);
     };
 
+    const handlePrint = () => {
+        window.print();
+    };
+
+    // Sort indicator component
+    const SortIndicator = ({ columnKey }) => {
+        if (sortColumn !== columnKey) {
+            return <ChevronUpIcon className="w-4 h-4 ml-1 opacity-0 group-hover:opacity-50" />;
+        }
+        return sortDirection === 'asc' 
+            ? <ChevronUpIcon className="w-4 h-4 ml-1" />
+            : <ChevronDownIcon className="w-4 h-4 ml-1" />;
+    };
+
     return (
         <div className="bg-slate-100 text-black min-h-screen">
-            <div className="flex p-2 bg-white shadow-inner justify-between items-center">
-                <div className="flex sm:flex-row flex-col ">
-                    <Link href="/consumers">
-                        <h1 className="text-2xl font-bold pl-2 cursor-pointer hover:text-blue-500 hover:underline hover:undeline-offset-1">
+            {/* Header */}
+            <div className="flex p-4 bg-white shadow-md justify-between items-center print:hidden">
+                <div className="flex items-center">
+                    <Link href="/consumers" className="flex items-center group">
+                        <ArrowLeftIcon className="w-6 h-6 text-[#fb8500] group-hover:-translate-x-1 transition mr-1" />
+                        <h1 className="text-2xl font-bold pl-2 cursor-pointer group-hover:text-[#fb8500] hover:underline">
                             Consumer
                         </h1>
                     </Link>
-                    <h1 className="text-2xl font-bold pl-2"> {consumer.firstName} {consumer.lastName}</h1>
                 </div>
-                <button
-                    className="justify-center bg-blue-500 text-white px-4 py-1 rounded-lg hover:bg-blue-700 flex items-center gap-2"
-                    onClick={() => setEditModalOpen(true)}
-                >
-                    <PencilIcon className="w-4 h-5 text-white" />Consumer
-                </button>
+                <div className="flex gap-2">
+                    <button
+                        className="bg-[#023047] text-white px-4 py-2 rounded-lg hover:bg-[#fb8500] flex items-center gap-2 transition"
+                        onClick={handlePrint}
+                    >
+                        <PrinterIcon className="w-5 h-5" />
+                        <span>Print</span>
+                    </button>
+                    <button
+                        className="bg-[#fb8500] text-white px-4 py-2 rounded-lg hover:bg-[#023047] flex items-center gap-2 transition"
+                        onClick={() => setEditModalOpen(true)}
+                    >
+                        <PencilIcon className="w-5 h-5" />
+                        <span>Edit Consumer</span>
+                    </button>
+                </div>
             </div>
 
-            <div className="flex flex-col p-6 space-y-6">
-                {/* Consumer Information */}
-                <div className=" p-6 ">
-                    <h1 className="text-2xl mb-4 font-bold">{consumer.lastName}, {consumer.firstName}</h1>
-                    <div className="space-y-2">
-                        <div className="flex items-center space-x-4">
-                            <p className="w-32 font-semibold">Meter Number:</p>
-                            <p>{consumer.meterNumber}</p>
+            <div className="p-4 md:p-6">
+                <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+                    <div className="print:flex print:justify-between print:items-center print:mb-4">
+                        <h1 className="text-3xl font-bold text-[#023047] mb-6 print:mb-0">
+                            {consumer.lastName}, {consumer.firstName}
+                        </h1>
+                        <div className="print:text-right">
+                            <p className="text-sm text-gray-500">Generated on: {new Date().toLocaleDateString()}</p>
                         </div>
-                        <div className="flex items-center space-x-4">
-                            <p className="w-32 font-semibold">Purok:</p>
-                            <p>{consumer.purok.replace('_', ' ')}</p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <p className="text-gray-500 font-semibold mb-1">Meter Number</p>
+                            <p className="font-medium text-gray-800">{consumer.meterNumber}</p>
                         </div>
-                        <div className="flex items-center space-x-4">
-                            <p className="w-32 font-semibold">Email:</p>
-                            <p>{consumer.email}</p>
+                        <div>
+                            <p className="text-gray-500 font-semibold mb-1">Purok</p>
+                            <p className="font-medium text-gray-800">{consumer.purok.replace('_', ' ')}</p>
                         </div>
-                        <div className="flex items-center space-x-4">
-                            <p className="w-32 font-semibold">Phone Number:</p>
-                            <p>{consumer.phoneNumber}</p>
+                        <div>
+                            <p className="text-gray-500 font-semibold mb-1">Phone Number</p>
+                            <p className="font-medium text-gray-800">{consumer.phoneNumber}</p>
                         </div>
-                        <div className="flex items-center space-x-4">
-                            <p className="w-32 font-semibold">Notification Preference:</p>
-                            <p>{consumer.notifPreference}</p>
+                        <div>
+                            <p className="text-gray-500 font-semibold mb-1">Email</p>
+                            <p className="font-medium text-gray-800">{consumer.email}</p>
                         </div>
-                        <div className="flex items-center space-x-4">
-                            <p className="w-32 font-semibold">Status:</p>
-                            <p>{consumer.status}</p>
+                        <div>
+                            <p className="text-gray-500 font-semibold mb-1">Notification Preference</p>
+                            <p className="font-medium text-gray-800">{consumer.notifPreference}</p>
                         </div>
-                        <div className="flex items-center space-x-4">
-                            <p className="w-32 font-semibold">Created At:</p>
-                            <p>{formatDate(consumer.createdAt)}</p>
+                        <div>
+                            <p className="text-gray-500 font-semibold mb-1">Status</p>
+                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                                consumer.status === 'Active' 
+                                    ? 'bg-green-100 text-green-700' 
+                                    : consumer.status === 'Disconnected'
+                                        ? 'bg-orange-100 text-orange-700'
+                                        : 'bg-red-100 text-red-700'
+                            }`}>
+                                {consumer.status}
+                            </span>
+                        </div>
+                        <div>
+                            <p className="text-gray-500 font-semibold mb-1">Created At</p>
+                            <p className="font-medium text-gray-800">{formatDate(consumer.createdAt)}</p>
                         </div>
                     </div>
                 </div>
 
-                {/* Billing Information Table */}
-                <div className="">
-                    <div className="flex flex-col justify-between items-center mt-12 mb-4 md:flex-row">
-                        <h2 className="text-xl text-slate-600 font-bold ml-4 mb-5 md:mb-0">Billing information</h2>
-
-                        <div className="flex justify-end space-x-5 items-center mb-2">
-                            <button onClick={() => setFilterModalOpen(true)}
-                                className="flex items-center gap-1 border border-cyan-400/40 bg-white shadow px-4 py-2 rounded hover:bg-cyan-100 hover:shadow-sm">
-                                <FunnelIcon className="w-4.5 h-4.5 text-cyan-400 mr-1" /> Filter
-                            </button>
+                {/* Billing Information */}
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 print:mb-4">
+                        <h2 className="text-2xl font-bold text-[#023047]">Billing Information</h2>
+                        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto print:hidden">
                             <div className="relative">
-                                <MagnifyingGlassIcon className="absolute left-2 top-2.5 w-5 h-5 text-cyan-400" />
+                                <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                                 <input
                                     type="text"
                                     placeholder="Search Month or Status"
-                                    className="placeholder:text-sm pl-8 bg-cyan-50 p-2 rounded shadow"
+                                    className="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                 />
                             </div>
                         </div>
                     </div>
-                    <div className="bg-cyan-50 rounded-lg overflow-hidden shadow-sm">
 
-                    <table className="w-full text-sm text-left text-slate-700">
-                        <thead className="bg-cyan-100 text-gray-500">
-                            <tr>
-                                <th
-                                    className="p-3 cursor-pointer text-center"
-                                    onClick={() => handleSort('monthYear')}
-                                >
-                                    Billing Month <span className={`ml-2 ${sortColumn === 'monthYear' ? (sortDirection === 'asc' ? 'text-blue-500' : 'text-red-500') : 'text-gray-500'}`}>↑↓</span>
-                                </th>
-                                <th
-                                    className="p-3 cursor-pointer text-center"
-                                    onClick={() => handleSort('totalAmount')}
-                                >
-                                    Total Amount <span className={`ml-2 ${sortColumn === 'totalAmount' ? (sortDirection === 'asc' ? 'text-blue-500' : 'text-red-500') : 'text-gray-500'}`}>↑↓</span>
-                                </th>
-                                <th className="p-3 text-center">Status</th>
-                                <th
-                                    className="p-3 cursor-pointer text-center"
-                                    onClick={() => handleSort('amountPaid')}
-                                >
-                                    Amount Paid <span className={`ml-2 ${sortColumn === 'amountPaid' ? (sortDirection === 'asc' ? 'text-blue-500' : 'text-red-500') : 'text-gray-500'}`}>↑↓</span>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {consumerBillsInfo.length ? (
-                                consumerBillsInfo.map(info => (
-                                    <tr key={info.billId}
-                                        onClick={() => handleRowClick(info.consumerId, info.monthYear)}
-                                        className="border-t border-b border-cyan-200 hover:bg-cyan-200 text-center">
-                                        <td className="p-3">{new Date(info.monthYear).toLocaleString('default', { month: 'long', year: 'numeric' })}</td>
-                                        <td className="p-3">₱{info.totalAmount.toFixed(2)}</td>
-                                        <td className={`p-3 ${info.status === 'Paid' ? 'text-green-600' : 'text-red-600'}`}>
-                                            {info.status}
-                                        </td>
-                                        <td className="p-3">₱{info.amountPaid}</td>
-                                    </tr>
-                                ))
-                            ) : (
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm text-left text-gray-700">
+                            <thead className="bg-gray-50 text-gray-600 font-medium">
                                 <tr>
-                                    <td colSpan={6} className="text-center py-4">No billing data available</td>
+                                    <th 
+                                        className="p-3 text-center cursor-pointer group hover:bg-gray-100"
+                                        onClick={() => handleSort('monthYear')}
+                                    >
+                                        <div className="flex items-center justify-center">
+                                            Billing Month
+                                            <SortIndicator columnKey="monthYear" />
+                                        </div>
+                                    </th>
+                                    <th className="p-3 text-center">Cubic Used</th>
+                                    <th className="p-3 text-center">Amount</th>
+                                    <th className="p-3 text-center">Balance</th>
+                                    <th className="p-3 text-center">Total Amount</th>
+                                    <th className="p-3 text-center">Amount Paid</th>
+                                    <th className="p-3 text-center">Status</th>
                                 </tr>
-                            )}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {consumerBillsInfo.length ? (
+                                    consumerBillsInfo.map((info) => (
+                                        <tr
+                                            key={info.billId}
+                                            onClick={() => !window.print && handleRowClick(info.consumerId, info.monthYear)}
+                                            className="border-t border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors duration-200 print:border-gray-300"
+                                        >
+                                            <td className="p-3 text-center">
+                                                {new Date(info.monthYear).toLocaleString('default', { month: 'long', year: 'numeric' })}
+                                            </td>
+                                            <td className="p-3 text-center">{info.cubicUsed} m³</td>
+                                            <td className="p-3 text-center text-sky-600">₱{info.totalAmount.toFixed(2)}</td>
+                                            <td className="p-3 text-center text-red-600">₱{info.balance.toFixed(2)}</td>
+                                            <td className="p-3 text-center text-green-600">₱{(info.totalAmount + info.balance).toFixed(2)}</td>
+                                            <td className="p-3 text-center">₱{info.amountPaid.toFixed(2)}</td>
+                                            <td className="p-3 text-center">
+                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium ${
+                                                    info.status === 'Paid' 
+                                                        ? 'bg-green-100 text-green-700' 
+                                                        : info.status === 'Partial'
+                                                            ? 'bg-yellow-100 text-yellow-700'
+                                                            : 'bg-red-100 text-red-700'
+                                                }`}>
+                                                    {info.status}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan={7} className="text-center py-6 text-gray-500">
+                                            No billing data available
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
 
                     {/* Pagination */}
-                    <div className="p-4 flex justify-end space-x-5 items-center text-sm text-gray-600">
-                        <div>
-                            Rows per page: {filter.pageSize} | {start}-{end} of {total}
+                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6 pt-4 border-t border-gray-100 print:hidden">
+                        <div className="text-sm text-gray-600">
+                            Showing {start}-{end} of {total} entries
                         </div>
                         <div className="flex gap-2">
                             <button
                                 onClick={() => setFilter((prev) => ({ ...prev, page: prev.page - 1 }))}
                                 disabled={filter.page <= 1}
-                                className="px-3 py-1 border rounded disabled:opacity-30"
+                                className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-30 disabled:hover:bg-white transition-colors duration-200"
                             >
                                 <ChevronLeftIcon className="w-5 h-5" />
                             </button>
                             <button
                                 onClick={() => setFilter((prev) => ({ ...prev, page: prev.page + 1 }))}
                                 disabled={filter.page * filter.pageSize >= total}
-                                className="px-3 py-1 border rounded disabled:opacity-30"
+                                className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-30 disabled:hover:bg-white transition-colors duration-200"
                             >
                                 <ChevronRightIcon className="w-5 h-5" />
                             </button>
@@ -239,17 +287,166 @@ const ConsumerDetailPage = () => {
                     </div>
                 </div>
             </div>
-            </div>
 
-            {/* Edit Consumer Modal */}
+            {/* Edit Modal */}
             {isEditModalOpen && (
                 <EditConsumerModal
                     isOpen={isEditModalOpen}
                     onClose={() => setEditModalOpen(false)}
-                    consumer={consumer} // pass the current consumer data
+                    consumer={consumer}
                 />
             )}
 
+            {/* Add print styles */}
+            <style jsx global>{`
+                @media print {
+                    @page {
+                        size: A4;
+                        margin: 1cm;
+                    }
+                    body {
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                    }
+                    /* Hide sidebar */
+                    aside, nav, [role="navigation"] {
+                        display: none !important;
+                    }
+                    /* Adjust main content to full width */
+                    main {
+                        margin-left: 0 !important;
+                        width: 100% !important;
+                    }
+                    /* Hide the back button and edit buttons */
+                    .flex.p-4.bg-white.shadow-md {
+                        display: none !important;
+                    }
+                    /* Hide filter and search controls */
+                    .flex.flex-col.md\\:flex-row.justify-between.items-start.md\\:items-center.gap-4.mb-6 {
+                        display: none !important;
+                    }
+                    /* Hide pagination */
+                    .flex.flex-col.sm\\:flex-row.justify-between.items-center.gap-4.mt-6.pt-4.border-t.border-gray-100 {
+                        display: none !important;
+                    }
+                    /* Adjust main content for print */
+                    .bg-slate-100 {
+                        background: none !important;
+                        padding: 0 !important;
+                        margin: 0 !important;
+                    }
+                    /* Hide background colors */
+                    .bg-white {
+                        background: none !important;
+                    }
+                    /* Remove shadows and borders */
+                    .shadow-lg {
+                        box-shadow: none !important;
+                    }
+                    .rounded-xl {
+                        border-radius: 0 !important;
+                    }
+                    /* Adjust borders for print */
+                    .border {
+                        border: 1px solid #e5e7eb !important;
+                    }
+                    .border-t {
+                        border-top: 1px solid #e5e7eb !important;
+                    }
+                    .border-gray-100 {
+                        border-color: #e5e7eb !important;
+                    }
+                    /* Adjust background colors */
+                    .bg-gray-50 {
+                        background-color: #f9fafb !important;
+                    }
+                    /* Text colors */
+                    .text-gray-600 {
+                        color: #4b5563 !important;
+                    }
+                    .text-gray-700 {
+                        color: #374151 !important;
+                    }
+                    .text-gray-800 {
+                        color: #1f2937 !important;
+                    }
+                    .text-gray-900 {
+                        color: #111827 !important;
+                    }
+                    .text-[#023047] {
+                        color: #023047 !important;
+                    }
+                    /* Status colors */
+                    .bg-green-100 {
+                        background-color: #d1fae5 !important;
+                    }
+                    .text-green-700 {
+                        color: #047857 !important;
+                    }
+                    .bg-red-100 {
+                        background-color: #fee2e2 !important;
+                    }
+                    .text-red-700 {
+                        color: #b91c1c !important;
+                    }
+                    /* Adjust spacing */
+                    .p-4, .md\\:p-6 {
+                        padding: 0 !important;
+                    }
+                    .mb-6 {
+                        margin-bottom: 1rem !important;
+                    }
+                    /* Table styles */
+                    table {
+                        page-break-inside: auto !important;
+                        width: 100% !important;
+                    }
+                    tr {
+                        page-break-inside: avoid !important;
+                        page-break-after: auto !important;
+                    }
+                    thead {
+                        display: table-header-group !important;
+                    }
+                    tbody {
+                        display: table-row-group !important;
+                    }
+                    /* Ensure content fits page */
+                    .min-h-screen {
+                        min-height: auto !important;
+                    }
+                    /* Add page break between sections */
+                    .bg-white.rounded-xl.shadow-lg.p-6.mb-6 {
+                        page-break-after: always !important;
+                    }
+                    /* Adjust consumer details section */
+                    .grid.grid-cols-1.md\\:grid-cols-2.gap-6 {
+                        display: grid !important;
+                        grid-template-columns: repeat(2, 1fr) !important;
+                        gap: 1rem !important;
+                    }
+                    /* Ensure proper spacing in consumer details */
+                    .text-gray-500.font-semibold.mb-1 {
+                        margin-bottom: 0.25rem !important;
+                    }
+                    .font-medium.text-gray-800 {
+                        margin-bottom: 0.5rem !important;
+                    }
+                    /* Ensure content is visible */
+                    .print\\:hidden {
+                        display: none !important;
+                    }
+                    /* Show content sections */
+                    .bg-white.rounded-xl.shadow-lg.p-6 {
+                        display: block !important;
+                        visibility: visible !important;
+                    }
+                    /* Ensure text is visible */
+                    .text-3xl, .text-2xl, .text-sm, .text-base {
+                        color: black !important;
+                    }
+                }
+            `}</style>
         </div>
     );
 };

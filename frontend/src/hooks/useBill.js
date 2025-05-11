@@ -57,7 +57,7 @@ export const useGenerateBills = () => {
     const generateBillsMutation = useMutation({
         mutationFn: generateBills,  // Call the API function to generate bills
         onSuccess: () => {
-            queryClient.invalidateQueries(['bills']);  // Invalidate the bills cache after successful generation
+            queryClient.invalidateQueries(['MonthBills']);  // Invalidate the bills cache after successful generation
         },
         onError: (error) => {
             console.error('Error generating bills:', error);

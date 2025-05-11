@@ -5,19 +5,19 @@ import { usePathname } from 'next/navigation';
 import { Home, FileText, DollarSign, Share2, BarChart, Users, User, LogOut, Menu, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { useUserById } from '@/hooks/useUser';  // Fixing the usage of useUser
-import useAuthStore from '@/store/useAuthStore'; // Zustand store for auth state
+import { useUserById } from '@/hooks/useUser';
+import useAuthStore from '@/store/useAuthStore';
+import LogoutModal from './modals/LogoutModal';
 
 export default function Sidebar() {
     const pathname = usePathname();
-    const { token, userId, userRole } = useAuthStore(state => state); // Getting userId and token from Zustand
-    const { logout } = useAuth(); // Use the logout mutation from useAuth
+    const { token, userId, userRole } = useAuthStore(state => state);
+    const { logout } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
+    const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
-    // Using the useUser hook to fetch user data by userId
-    const { data: user, isLoading } = useUserById(userId); // Replace with your correct hook to get user data
-
-    const isAdmin = userRole === 'Admin'; // Check if the user is an admin
+    const { data: user, isLoading } = useUserById(userId);
+    const isAdmin = userRole === 'Admin';
 
     const navItems = [
         { href: '/dashboard', label: 'Dashboard', icon: <Home size={20} /> },
@@ -30,14 +30,18 @@ export default function Sidebar() {
     ];
 
     useEffect(() => {
-        setIsOpen(false); // Close sidebar when route (pathname) changes
+        setIsOpen(false);
     }, [pathname]);
 
-    if (isLoading) return <div>Loading...</div>; // Show loading if user data is being fetched
+    if (isLoading) return (
+        <div className="flex items-center justify-center h-screen bg-[#3d5a80]">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#e0fbfc]"></div>
+        </div>
+    );
 
     return (
         <>
-            {/* Burger button for mobile view */}
+            {/* Mobile Menu Button */}
             <button
                 className="sm:hidden fixed top-2 right-2 z-50 bg-cyan-50 p-2 rounded shadow hover:bg-cyan-200"
                 onClick={() => setIsOpen(!isOpen)}
@@ -45,57 +49,71 @@ export default function Sidebar() {
                 {!isOpen ? <Menu className="text-cyan-500" size={16} /> : <X className="text-cyan-500" size={16} />}
             </button>
 
-            {/* Sidebar for all views */}
+            {/* Sidebar */}
             <aside
-                className={`bg-sky-200 text-sm text-gray-800 shadow-md h-screen flex flex-col items-center p-4
+                className={`text-sm text-gray-100 shadow-lg h-screen flex flex-col items-center p-4
                     transition-transform duration-300 z-40 fixed top-0 left-0
-                    ${isOpen ? 'translate-x-0' : '-translate-x-full'} sm:translate-x-0 sm:w-64`}
+                    ${isOpen ? 'translate-x-0' : '-translate-x-full'} sm:translate-x-0 sm:w-64 rounded-r-[20px]`}
+                style={{ 
+                    backgroundColor: '#3d5a80',
+                    backgroundImage: 'linear-gradient(to bottom, #3d5a80, #2c3e50)'
+                }}
             >
                 {/* Logo */}
-                <div className="flex flex-col items-center mb-4">
-                    <img src="/images/BLWSDAI_logo.png" alt="Logo" className="w-10 mb-2" />
-                    <p className="font-bold">BLWSDAI</p>
+                <div className="flex flex-col items-center mb-12">
+                    <div className="flex items-center gap-2 bg-white/10 p-3 rounded-lg">
+                        <img src="/images/BLWSDAI_logo.png" alt="Logo" className="w-10" />
+                        <p className="font-bold text-[#e0fbfc] text-lg">BLWSDAI</p>
+                    </div>
                 </div>
 
                 {/* User Info */}
-                <div className="hidden sm:flex flex-col items-center text-center mb-6">
-                    <img
-                        src={`images/${userRole || 'Staff'}.png`}
-                        alt="User"
-                        className="w-24 h-24 rounded-full mb-2"
-                    />
-                    <p className="font-bold">{user?.name || 'Admin Name'}</p>
-                    <p className="text-blue-600 text-sm capitalize">{user?.role || 'Admin'}</p>
+                <div className="hidden sm:flex flex-col items-center text-center mb-8 w-full">
+                    <div className="relative">
+                        <img
+                            src={`images/${userRole || 'Staff'}.png`}
+                            alt="User"
+                            className="w-24 h-24 rounded-full mb-3 border-4 border-[#8ecae6]/30"
+                        />
+                        <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+                    </div>
+                    <p className="font-bold text-[#e0fbfc] text-lg">{user?.name || 'Admin Name'}</p>
+                    <p className="text-[#8ecae6] text-sm capitalize px-3 py-1 rounded-full mt-1">{user?.role || 'Admin'}</p>
                 </div>
 
-                {/* Nav Items */}
-                <div className="mt-10 sm:mt-1">
-                    <nav className="w-full space-y-2 ">
+                {/* Nav Items Wrapper */}
+                <div className="flex-1 flex items-center gap-2 mb-15 w-full">
+                    <nav className="flex flex-col w-full gap-y-2">
                         {navItems.map(({ href, label, icon }) => (
                             <Link
                                 key={href}
                                 href={href}
-                                onClick={() => setIsOpen(false)} // Close sidebar when a link is clicked (for mobile view)
-                                className={`flex items-center gap-3 px-10 sm:px-6 py-2 rounded-md transition 
-                                    ${pathname.startsWith(href) ? 'bg-blue-500 text-white' : 'hover:bg-blue-200 text-gray-800'}
-                                    ${pathname.startsWith(href) ? 'font-bold' : ''}  // Make active item bold
-                                `}
+                                onClick={() => setIsOpen(false)}
+                                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
+                                    ${pathname.startsWith(href) 
+                                        ? 'bg-[#8ecae6] text-[#023047] font-bold shadow-md' 
+                                        : 'hover:bg-[#8ecae6]/20 text-[#e0fbfc] hover:translate-x-1'}`}
                             >
-                                {icon}
-                                <span className="ml-2">{label}</span>
+                                <div className={`p-1.5 rounded-md ${pathname.startsWith(href) ? 'bg-[#023047]/10' : 'bg-[#8ecae6]/10'}`}>
+                                    {icon}
+                                </div>
+                                <span className="ml-1">{label}</span>
                             </Link>
                         ))}
                     </nav>
                 </div>
 
+                {/* Logout Button */}
                 <button
-                    onClick={logout}
-                    className="mt-auto flex items-center gap-2 text-red-600 hover:text-red-800 transition mt-6"
+                    onClick={() => setIsLogoutModalOpen(true)}
+                    className="flex items-center gap-2 text-red-400 hover:text-red-300 transition-all duration-200 hover:translate-x-1 bg-red-500/10 px-4 py-2 rounded-lg w-full justify-center"
                 >
                     <LogOut size={20} />
                     <span>Logout</span>
                 </button>
             </aside>
+
+            <LogoutModal isOpen={isLogoutModalOpen} setIsOpen={setIsLogoutModalOpen} onLogout={logout} />
         </>
     );
 }

@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { getIncomeReport, getGeneralDisconnectionReport, getIndividualDisconnectionReport, notifyDisconnection } from '@/lib/reportSummaryApi'; // Importing the API functions
+import { useState } from 'react';
 
 // Hook to fetch Income Report
 export const useIncomeReport = (startMonth, endMonth) => {
@@ -32,17 +33,34 @@ export const useIndividualDisconnectionReport = (consumerId) => {
 // Hook to notify a consumer for disconnection
 export const notifyIndvDisconnection = () => {
     const queryClient = useQueryClient();
+    const [isToastOpen, setIsToastOpen] = useState(false);
+    const [toastConfig, setToastConfig] = useState({ type: 'success', message: '' });
+
     const notifyDisconnectionMutation = useMutation({
         mutationFn: notifyDisconnection,
         onSuccess: () => {
-            alert("Successfully Notified Consumer.");
+            setToastConfig({
+                type: 'success',
+                message: 'Successfully Notified Consumer.'
+            });
+            setIsToastOpen(true);
         },
         onError: (error) => {
             console.error('Error notifying consumer:', error);
-            alert('Failed to notify consumer. Please try again.');
+            setToastConfig({
+                type: 'error',
+                message: 'Failed to notify consumer. Please try again.'
+            });
+            setIsToastOpen(true);
         },
     });
-    return { notifyDisconnectionMutation };
+
+    return { 
+        notifyDisconnectionMutation,
+        isToastOpen,
+        setIsToastOpen,
+        toastConfig
+    };
 };
 
 

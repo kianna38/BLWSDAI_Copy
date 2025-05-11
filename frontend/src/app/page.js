@@ -5,10 +5,13 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useAuth } from '@/hooks/useAuth'; // Import your custom useAuth hook
 import useAuthStore from '@/store/useAuthStore'; // Import Zustand store
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/solid';
 
 export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
     const router = useRouter();
 
     const { login, loginLoading, loginError } = useAuth(); // Use the login mutation from useAuth
@@ -20,6 +23,12 @@ export default function Login() {
     const handleSubmit = (e) => {
         e.preventDefault();
         login({ email, password });
+    };
+
+    // Handle forgot password submission
+    const handleForgotPassword = (e) => {
+        e.preventDefault();
+        setShowForgotPasswordModal(false);
     };
 
     // Redirect to dashboard if user is already logged in
@@ -42,54 +51,120 @@ export default function Login() {
     }
 
     return (
-        <div className="flex min-h-screen bg-cover bg-no-repeat bg-center relative" style={{ backgroundImage: "url('/images/login_bg.png')" }}>
-            <div className="flex justify-center items-center my-auto h-full w-full relative z-10">
-                <div className="bg-slate-100/80 p-8 rounded-lg shadow-lg max-w-2xl w-full flex items-center justify-between">
-                    <div className="flex justify-center items-center">
-                        <Image src="/images/BLWSDAI_logo.png" alt="BLWSDAI Logo" width={500} height={500} />
-                    </div>
+        <div className="min-h-screen flex flex-col lg:flex-row">
+            {/* Left side with background image */}
+            <div className="hidden lg:block lg:w-1/2 relative">
+                <div
+                    className="absolute inset-0 bg-cover bg-no-repeat bg-center"
+                    style={{ backgroundImage: "url('/images/login_bg.png')" }}
+                ></div>
+            </div>
 
-                    <div className="flex flex-col w-full ml-6">
-                        <h2 className="text-left text-2xl font-semibold mb-4 text-gray-700">Login to your account</h2>
-                        <form onSubmit={handleSubmit} className="w-full">
-                            <div className="mb-4">
-                                <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
-                                <input
-                                    type="email"
-                                    id="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="example@email.com"
-                                    className="text-black bg-slate-100/80 placeholder:text-slate-300 w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                />
+            {/* Right side with login form */}
+            <div className="w-full lg:w-1/2 flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 py-12 bg-slate-100">
+                {/* System Title */}
+                <h1 className="text-2xl sm:text-3xl font-bold text-[#023047] mb-8 text-center">
+                    BLWSDAI Water Billing and Management System
+                </h1>
+
+                {/* Logo */}
+                <div className="mb-8">
+                    <Image 
+                        src="/images/BLWSDAI_logo.png" 
+                        alt="BLWSDAI Logo" 
+                        width={200} 
+                        height={200}
+                        className="w-auto h-auto"
+                    />
+                </div>
+
+                {/* Login Form */}
+                <div className="w-full max-w-md">
+                    <h2 className="text-2xl font-semibold mb-6 text-gray-700">Login to your account</h2>
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        <div>
+                            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
+                            <input
+                                type="email"
+                                id="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="example@email.com"
+                                className="mt-1 text-black bg-white placeholder:text-slate-400 w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+                        <div>
+                            <div className="flex justify-between">
+                                <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowForgotPasswordModal(true)}
+                                    className="text-blue-600 text-sm hover:text-blue-800"
+                                >
+                                    Forgot?
+                                </button>
                             </div>
-                            <div className="mb-6">
-                                <div className="flex justify-between">
-                                    <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
-                                    <a href="#" className="text-blue-600 text-sm hover:text-blue-800">Forgot?</a>
-                                </div>
+                            <div className="relative">
                                 <input
-                                    type="password"
+                                    type={showPassword ? "text" : "password"}
                                     id="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     placeholder="Enter your password"
-                                    className="text-black bg-slate-100/80 placeholder:text-slate-300 w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="mt-1 text-black bg-white placeholder:text-slate-400 w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 />
-                            </div>
-                            <div className="flex justify-between items-center mb-6">
                                 <button
-                                    type="submit"
-                                    className="w-full py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition disabled:opacity-50"
-                                    disabled={loginLoading} // Disable button if login is in progress
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
                                 >
-                                    {loginLoading ? 'Logging in...' : 'Log In'}
+                                    {showPassword ? (
+                                        <EyeSlashIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                                    ) : (
+                                        <EyeIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                                    )}
                                 </button>
                             </div>
-                        </form>
-                    </div>
+                        </div>
+                        <button
+                            type="submit"
+                            className="w-full py-3 bg-blue-600 text-white rounded-md hover:bg-[#023047] transition disabled:opacity-50"
+                            disabled={loginLoading}
+                        >
+                            {loginLoading ? 'Logging in...' : 'Log In'}
+                        </button>
+                    </form>
                 </div>
             </div>
+
+            {/* Forgot Password Modal */}
+            {showForgotPasswordModal && (
+                <div className="fixed inset-0 bg-slate-500/50 flex items-center justify-center z-50">
+                    <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full mx-4">
+                        <h3 className="text-2xl text-[#fb8500] font-semibold mb-4">Reset Password</h3>
+                        <div className="mb-6">
+                            <p className="text-gray-700 mb-4">
+                                To reset your password, please contact your administrator or send an email to:
+                            </p>
+                            <a 
+                                href="mailto:blwsdai@gmail.com" 
+                                className="text-blue-600 hover:text-blue-800 font-medium"
+                            >
+                                blwsdai@gmail.com
+                            </a>
+                        </div>
+                        <div className="flex justify-end">
+                            <button
+                                type="button"
+                                onClick={() => setShowForgotPasswordModal(false)}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-[#023047] transition"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

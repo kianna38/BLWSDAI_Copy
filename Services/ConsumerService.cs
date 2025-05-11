@@ -185,9 +185,28 @@ namespace BLWSDAI.Services
             c.NotifPreference = dto.NotifPreference;
 
             _context.Consumers.Update(c);
+
+            // If the status is Disconnected or Cut
+            if (c.Status == ConsumerStatusEnum.Disconnected || c.Status == ConsumerStatusEnum.Cut)
+            {
+                var currentYear = DateTime.UtcNow.Year;
+                var currentMonth = DateTime.UtcNow.Month;
+
+                var readingToDelete = await _context.Readings
+                    .FirstOrDefaultAsync(r => r.ConsumerId == c.ConsumerId &&
+                                              r.MonthYear.Year == currentYear &&
+                                              r.MonthYear.Month == currentMonth);
+
+                if (readingToDelete != null)
+                {
+                    _context.Readings.Remove(readingToDelete);
+                }
+            }
+
             await _context.SaveChangesAsync();
             return true;
         }
+
 
         public async Task<bool> DeleteAsync(int id)
         {

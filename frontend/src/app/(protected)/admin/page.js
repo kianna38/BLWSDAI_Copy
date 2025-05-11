@@ -13,6 +13,8 @@ import { PencilIcon, PlusIcon, FunnelIcon, MagnifyingGlassIcon, ChevronLeftIcon,
 import { formatDate } from '@/utils/formatDate';
 import { useDeleteUser } from '@/hooks/useUser'; // Import the delete user hook
 import EditProfileModal from '@/components/modals/EditProfileModal'; // Import the edit modal
+import RevertBillsModal from '@/components/modals/RevertBillsModal';
+import ToastModal from '@/components/modals/ToastModal';
 
 export default function AdminPage() {
     const { deleteUserMutation } = useDeleteUser(); // Destructure delete mutation from hook
@@ -56,6 +58,13 @@ export default function AdminPage() {
     useEffect(() => {
         setFilter(prev => ({ ...prev, sortDir: internalSortDir, page: 1 }));
     }, [internalSortDir]);
+
+    const [isRevertModalOpen, setIsRevertModalOpen] = useState(false);
+    const [isToastOpen, setIsToastOpen] = useState(false);
+    const [toastConfig, setToastConfig] = useState({ type: 'success', message: '' });
+
+    const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+    const [userToDelete, setUserToDelete] = useState(null);
 
     const handleRevertBill = () => {
         // Logic to handle bill revert action
@@ -106,32 +115,59 @@ export default function AdminPage() {
 
     const handleDeleteBills = () => {
         const today = new Date();
-        const monthYear = new Date(Date.UTC(today.getFullYear(), today.getMonth(), 1)).toISOString(); // 🔥 First day of current month
+        const monthYear = new Date(Date.UTC(today.getFullYear(), today.getMonth(), 1)).toISOString();
 
-        const confirmDelete = window.confirm("Are you sure you want to delete the bills?");
-        if (confirmDelete) {
-            deleteBillsMutation.mutate(monthYear, {
-                onSuccess: () => {
-                    alert('Bills deleted successfully!');
-                },
-                onError: (error) => {
-                    if (error?.response?.status === 400) {
-                        alert('Cannot delete bills because there are associated payments.');
-                    } else {
-                        alert('Error deleting bills.');
-                    }
-                }
-            });
-        }
+        deleteBillsMutation.mutate(monthYear, {
+            onSuccess: () => {
+                setIsRevertModalOpen(false);
+                setToastConfig({
+                    type: 'success',
+                    message: 'Bills deleted successfully!'
+                });
+                setIsToastOpen(true);
+            },
+            onError: (error) => {
+                setIsRevertModalOpen(false);
+                setToastConfig({
+                    type: 'error',
+                    message: error?.response?.status === 400 
+                        ? 'There is no generated bill for this month'
+                        : 'Error deleting bills.'
+                });
+                setIsToastOpen(true);
+            }
+        });
     };
 
 
     const handleDelete = (userId) => {
-        console.log(userId);
-        const confirmDelete = window.confirm("Are you sure you want to delete this user?");
-        if (confirmDelete) {
-            deleteUserMutation.mutate(userId);  // Ensure only the user ID is passed
-        }
+        setUserToDelete(userId);
+        setToastConfig({
+            type: 'confirm',
+            message: 'Are you sure you want to delete this user?',
+            onConfirm: () => {
+                deleteUserMutation.mutate(userId, {
+                    onSuccess: () => {
+                        setToastConfig({
+                            type: 'success',
+                            message: 'User deleted successfully!'
+                        });
+                        setIsToastOpen(true);
+                    },
+                    onError: (error) => {
+                        setToastConfig({
+                            type: 'error',
+                            message: error?.response?.data?.message || 'Error deleting user. Please try again.'
+                        });
+                        setIsToastOpen(true);
+                    }
+                });
+            },
+            onCancel: () => {
+                setUserToDelete(null);
+            }
+        });
+        setIsToastOpen(true);
     };
 
     const handleEdit = (user) => {
@@ -139,231 +175,243 @@ export default function AdminPage() {
         setEditProfileOpen(true); // Open the edit profile modal
     };
 
-    if (usersLoading) return <div>Loading...</div>;
+    if (usersLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#fb8500]"></div>
+            </div>
+        );
+    }
 
     return (
-        <div className="bg-slate-100 text-black min-h-screen">
-            <div className="flex p-4 bg-white shadow-md justify-between items-center">
-                <h1 className="text-2xl font-bold">Admin</h1>
-                <button
-                    onClick={() => handleDeleteBills()}
-                    className="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-700"
-                >
-                    Revert This Month's Generated Bill
-                </button>
-            </div>
-
-            <div className="flex flex-col p-6 space-y-6">
-
-                <div className="flex justify-center mt-6 space-x-5 md:space-y-0 space-y-5 md:flex-row flex-col">
-                    <div className="bg-white shadow-md rounded-lg p-4 w-full md:w-1/2 ">
-                        <div className="flex justify-between">
-                            <div>
-                                <h3 className="text-lg font-semibold">Staff Salary</h3>
-                                <p className="text-sm font-light text-slate-500">{formatDate(latestSalaryQuery?.data?.updatedAt)} </p>
-                            </div>
-                            <button
-                                onClick={() => setEditSalaryOpen(true)}
-                                className="justify-center bg-blue-500 text-white px-4 py-1 rounded-lg hover:bg-blue-700 flex items-center gap-2 h-fit"
-                            >
-                                <PencilIcon className="w-4 h-5 text-white" /> Edit Salary
-                            </button>
-                        </div>
-                        <div className="flex justify-center flex-col mx-5">
-                            <div className="flex justify-between mt-2">
-                                <p className="text-left">President:</p>
-                                <p className="text-right">₱ {latestSalaryQuery?.data?.presidentSalary}</p>
-                            </div>
-                            <div className="flex justify-between mt-2">
-                                <p className="text-left">Vice President:</p>
-                                <p className="text-right">₱ {latestSalaryQuery?.data?.vicePresidentSalary}</p>
-                            </div>
-                            <div className="flex justify-between mt-2">
-                                <p className="text-left">Secretary:</p>
-                                <p className="text-right">₱ {latestSalaryQuery?.data?.secretarySalary}</p>
-                            </div>
-                            <div className="flex justify-between mt-2">
-                                <p className="text-left">Treasurer:</p>
-                                <p className="text-right">₱ {latestSalaryQuery?.data?.treasurerSalary}</p>
-                            </div>
-                            <div className="flex justify-between mt-2">
-                                <p className="text-left">Maintenance 1:</p>
-                                <p className="text-right">₱ {latestSalaryQuery?.data?.maintenanceOneSalary}</p>
-                            </div>
-                            <div className="flex justify-between mt-2">
-                                <p className="text-left">Maintenance 2:</p>
-                                <p className="text-right">₱ {latestSalaryQuery?.data?.maintenanceTwoSalary}</p>
-                            </div>
-                            <div className="flex justify-between mt-2">
-                                <p className="text-left font-bold">Total:</p>
-                                <p className="text-right font-bold">₱ {totalSalary}</p>
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <div className="bg-white shadow-md rounded-lg p-4 w-full md:w-1/2">
-                        <div className="flex justify-between">
-                            <div>
-                                <h3 className="text-lg font-semibold">Rates</h3>
-                                <p className="text-sm font-light text-slate-500">{formatDate(getRatesInfo?.data?.updatedAt)} </p>
-                            </div>
-                            <button
-                                onClick={() => setEditRatesOpen(true)}
-                                className="justify-center bg-blue-500 text-white px-4 py-1 rounded-lg hover:bg-blue-700 flex items-center gap-2 h-fit"
-                            >
-                                <PencilIcon className="w-4 h-5 text-white" /> Edit Rates
-                            </button>
-                        </div>
-                        <div className="flex justify-center flex-col mx-5 h-2/3">
-                            <div className="flex justify-between mt-2">
-                                <p className="text-left">Consumer Cubic Meter Rate:</p>
-                                <p className="text-right">₱ {getRatesInfo?.data?.consumerCubicMeterRate}</p>
-                            </div>
-                            <div className="flex justify-between mt-2">
-                                <p className="text-left">Mother Meter Cubic Meter Rate:</p>
-                                <p className="text-right">₱ {getRatesInfo?.data?.motherMeterCubicMeterRate}</p>
-                            </div>
-                            <div className="flex justify-between mt-2">
-                                <p className="text-left">Penalty Rate:</p>
-                                <p className="text-right">₱ {getRatesInfo?.data?.penaltyRate}</p>
-                            </div>
-                            <div className="flex justify-between mt-2">
-                                <p className="text-left">Subsidy Rate:</p>
-                                <p className="text-right">₱ {getRatesInfo?.data?.subsidyRate}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className="flex justify-between items-center flex-col space-y-5 md:space-y-0 md:flex-row">
-                    <div>
+        <div className="bg-slate-50 min-h-screen">
+            {/* Header */}
+            <div className="bg-white shadow-sm border-b border-gray-200">
+                <div className="px-4 py-4">
+                    <div className="flex justify-between items-center">
+                        <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
                         <button
-                            onClick={() => setAddUserOpen(true)}
-                            className="justify-center bg-blue-500 text-white px-4 py-1 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+                            onClick={() => setIsRevertModalOpen(true)}
+                            className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
                         >
-                            <PlusIcon className="w-4 h-5 text-white" />Add User
+                            Revert This Month's Generated Bill
                         </button>
                     </div>
-
-                    <div className="flex gap-4 items-center">
-                        <div className="relative">
-                            <MagnifyingGlassIcon className="absolute left-2 top-2.5 w-5 h-5 text-cyan-400" />
-                            <input
-                                type="text"
-                                placeholder="Search Users"
-                                className="pl-8 bg-cyan-50 p-2 rounded shadow"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
-                        </div>
-                    </div>
                 </div>
-
-                <div className="bg-cyan-50 rounded-lg w-full overflow-x-auto shadow-sm">
-                    <table className="w-full text-sm text-left text-slate-700 ">
-                        <thead className="bg-cyan-100 uppercase text-gray-500 font-medium">
-
-
-                            {/* Header row for larger screens */}
-                            <tr className="text-center">
-                                <th className="px-4 py-2">ID No.</th>
-                                <th
-                                    className="p-3 text-center cursor-pointer select-none"
-                                    onClick={() => handleSort('name')}
-                                >
-                                    <div className="flex items-center justify-center space-x-1">
-                                        <span>Name</span>
-                                        {filter.sortBy === 'name' ? (
-                                            filter.sortDir === 'asc' ? (
-                                                <ChevronUpIcon className="w-4 h-4 text-blue-500" />
-                                            ) : (
-                                                <ChevronDownIcon className="w-4 h-4 text-blue-500" />
-                                            )
-                                        ) : (
-                                            <ChevronDownIcon className="w-4 h-4 text-gray-400" />
-                                        )}
-                                    </div>
-                                </th>
-                                <th className="p-3 text-center ">Email</th>
-                                <th className="p-3 text-center ">User Role</th>
-                                <th
-                                    className="p-3 text-center cursor-pointer select-none"
-                                    onClick={() => handleSort('createdAt')}
-                                >
-                                    <div className="flex items-center justify-center space-x-1">
-                                        <span>Created At</span>
-                                        {filter.sortBy === 'createdAt' ? (
-                                            filter.sortDir === 'asc' ? (
-                                                <ChevronUpIcon className="w-4 h-4 text-blue-500" />
-                                            ) : (
-                                                <ChevronDownIcon className="w-4 h-4 text-blue-500" />
-                                            )
-                                        ) : (
-                                            <ChevronDownIcon className="w-4 h-4 text-gray-400" />
-                                        )}
-                                    </div>
-                                </th>
-
-                                <th className="p-3 text-center pr-1">Actions</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            {filteredUsers.length > 0 ? filteredUsers.map((user) => (
-                                <tr key={user.userId} className="border-t border-b border-cyan-200 text-center">
-
-                                    {/* Larger screen columns */}
-                                    <td className="px-4 py-2">{user.userId}</td>
-                                    <td className="p-3 text-center ">{user.name}</td>
-                                    <td className="p-3 text-center ">{user.email}</td>
-                                    <td className="p-3 text-center ">{user.role}</td>
-                                    <td className="p-3 text-center ">{formatDate(user.createdAt)}</td>
-                                    <td className="p-3 text-center ">
-                                        <div className="flex justify-center space-x-2 flex-col space-y-1">
-                                            <button onClick={() => handleEdit(user)} className="bg-blue-500 w-full text-white px-2 py-1 rounded hover:bg-blue-700">Edit</button>
-                                            <button onClick={() => handleDelete(user.userId)} className="bg-red-500 w-full text-white px-2 py-1 rounded hover:bg-red-700">Delete</button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            )) : (
-                                <tr>
-                                    <td colSpan="6" className="text-center p-3">No users found</td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-
-
-
-
-                    <div className="p-4 flex justify-end space-x-5 items-center text-sm text-gray-600">
-                        <div>
-                            Rows per page: {filter.pageSize} | {start}-{end} of {total}
-                        </div>
-                        <div className="flex gap-2">
-                            <button
-                                onClick={() => handlePageChange(filter.page - 1)}
-                                disabled={filter.page <= 1}
-                                className="px-3 py-1 border rounded disabled:opacity-30"
-                            >
-                                <ChevronLeftIcon className="w-5 h-5" />
-                            </button>
-                            <button
-                                onClick={() => handlePageChange(filter.page + 1)}
-                                disabled={filter.page >= totalPages}
-                                className="px-3 py-1 border rounded disabled:opacity-30"
-                            >
-                                <ChevronRightIcon className="w-5 h-5" />
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-
-
             </div>
 
-            {/* Modal for Salary Edit */}
+            <div className="px-4 py-6">
+                {/* Cards Section */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    {/* Staff Salary Card */}
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                        <div className="p-4">
+                            <div className="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 className="text-lg font-semibold text-gray-900">Staff Salary</h3>
+                                    <p className="text-sm text-gray-500 mt-1">Last updated: {formatDate(latestSalaryQuery?.data?.updatedAt)}</p>
+                                </div>
+                                <button
+                                    onClick={() => setEditSalaryOpen(true)}
+                                    className="bg-[#fb8500] text-white p-2 rounded-lg hover:bg-[#fb8500]/90 transition-colors"
+                                >
+                                    <PencilIcon className="w-5 h-5" />
+                                </button>
+                            </div>
+                            <div className="space-y-3">
+                                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                                    <span className="text-gray-600">President</span>
+                                    <span className="font-medium text-gray-900">₱{latestSalaryQuery?.data?.presidentSalary?.toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                                    <span className="text-gray-600">Vice President</span>
+                                    <span className="font-medium text-gray-900">₱{latestSalaryQuery?.data?.vicePresidentSalary?.toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                                    <span className="text-gray-600">Secretary</span>
+                                    <span className="font-medium text-gray-900">₱{latestSalaryQuery?.data?.secretarySalary?.toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                                    <span className="text-gray-600">Treasurer</span>
+                                    <span className="font-medium text-gray-900">₱{latestSalaryQuery?.data?.treasurerSalary?.toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                                    <span className="text-gray-600">Maintenance 1</span>
+                                    <span className="font-medium text-gray-900">₱{latestSalaryQuery?.data?.maintenanceOneSalary?.toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                                    <span className="text-gray-600">Maintenance 2</span>
+                                    <span className="font-medium text-gray-900">₱{latestSalaryQuery?.data?.maintenanceTwoSalary?.toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between items-center pt-3">
+                                    <span className="font-semibold text-gray-900">Total</span>
+                                    <span className="font-bold text-lg text-gray-900">₱{totalSalary?.toLocaleString()}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Rates Card */}
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                        <div className="p-4">
+                            <div className="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 className="text-lg font-semibold text-gray-900">Rates</h3>
+                                    <p className="text-sm text-gray-500 mt-1">Last updated: {formatDate(getRatesInfo?.data?.updatedAt)}</p>
+                                </div>
+                                <button
+                                    onClick={() => setEditRatesOpen(true)}
+                                    className="bg-[#fb8500] text-white p-2 rounded-lg hover:bg-[#fb8500]/90 transition-colors"
+                                >
+                                    <PencilIcon className="w-5 h-5" />
+                                </button>
+                            </div>
+                            <div className="space-y-3">
+                                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                                    <span className="text-gray-600">Consumer Cubic Meter Rate</span>
+                                    <span className="font-medium text-gray-900">₱{getRatesInfo?.data?.consumerCubicMeterRate?.toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                                    <span className="text-gray-600">Mother Meter Cubic Meter Rate</span>
+                                    <span className="font-medium text-gray-900">₱{getRatesInfo?.data?.motherMeterCubicMeterRate?.toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                                    <span className="text-gray-600">Penalty Rate</span>
+                                    <span className="font-medium text-gray-900">₱{getRatesInfo?.data?.penaltyRate?.toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between items-center py-2">
+                                    <span className="text-gray-600">Subsidy Rate</span>
+                                    <span className="font-medium text-gray-900">₱{getRatesInfo?.data?.subsidyRate?.toLocaleString()}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Users Section */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                    <div className="p-4">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                            <button
+                                onClick={() => setAddUserOpen(true)}
+                                className="bg-[#fb8500] text-white px-4 py-2 rounded-lg hover:bg-[#fb8500]/90 transition-colors flex items-center gap-2"
+                            >
+                                <PlusIcon className="w-5 h-5" />
+                                Add User
+                            </button>
+                            <div className="relative w-full sm:w-64">
+                                <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                <input
+                                    type="text"
+                                    placeholder="Search users..."
+                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fb8500] focus:border-transparent"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead>
+                                    <tr className="bg-gray-50">
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID No.</th>
+                                        <th 
+                                            className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                                            onClick={() => handleSort('name')}
+                                        >
+                                            <div className="flex items-center gap-1">
+                                                Name
+                                                {filter.sortBy === 'name' && (
+                                                    filter.sortDir === 'asc' ? 
+                                                        <ChevronUpIcon className="w-4 h-4" /> : 
+                                                        <ChevronDownIcon className="w-4 h-4" />
+                                                )}
+                                            </div>
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                                        <th 
+                                            className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                                            onClick={() => handleSort('createdAt')}
+                                        >
+                                            <div className="flex items-center gap-1">
+                                                Created At
+                                                {filter.sortBy === 'createdAt' && (
+                                                    filter.sortDir === 'asc' ? 
+                                                        <ChevronUpIcon className="w-4 h-4" /> : 
+                                                        <ChevronDownIcon className="w-4 h-4" />
+                                                )}
+                                            </div>
+                                        </th>
+                                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {filteredUsers.length > 0 ? (
+                                        filteredUsers.map((user) => (
+                                            <tr key={user.userId} className="hover:bg-gray-50">
+                                                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{user.userId}</td>
+                                                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{user.name}</td>
+                                                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{user.email}</td>
+                                                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{user.role}</td>
+                                                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{formatDate(user.createdAt)}</td>
+                                                <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                    <div className="flex justify-end gap-2">
+                                                        <button
+                                                            onClick={() => handleEdit(user)}
+                                                            className="text-[#fb8500] hover:text-[#fb8500]/80"
+                                                        >
+                                                            Edit
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDelete(user.userId)}
+                                                            className="text-red-600 hover:text-red-800"
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan="6" className="px-4 py-4 text-center text-sm text-gray-500">
+                                                No users found
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Pagination */}
+                        <div className="flex items-center justify-between mt-4">
+                            <div className="text-sm text-gray-700">
+                                Showing {start} to {end} of {total} entries
+                            </div>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => handlePageChange(filter.page - 1)}
+                                    disabled={filter.page <= 1}
+                                    className="px-3 py-1 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                                >
+                                    <ChevronLeftIcon className="w-5 h-5" />
+                                </button>
+                                <button
+                                    onClick={() => handlePageChange(filter.page + 1)}
+                                    disabled={filter.page >= totalPages}
+                                    className="px-3 py-1 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                                >
+                                    <ChevronRightIcon className="w-5 h-5" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Modals */}
             {isEditSalaryOpen && (
                 <EditSalaryModal
                     isOpen={isEditSalaryOpen}
@@ -372,7 +420,6 @@ export default function AdminPage() {
                 />
             )}
 
-            {/* Modal for Rates Edit */}
             {isEditRatesOpen && (
                 <EditRatesModal
                     isOpen={isEditRatesOpen}
@@ -381,7 +428,6 @@ export default function AdminPage() {
                 />
             )}
 
-            {/* Modal for Add User */}
             {isAddUserOpen && (
                 <AddUserModal
                     isOpen={isAddUserOpen}
@@ -389,13 +435,25 @@ export default function AdminPage() {
                 />
             )}
 
-            {/* Edit Profile Modal */}
             {editProfileOpen && selectedUser && (
                 <EditProfileModal
-                    user={selectedUser} // Pass the selected user to the modal
-                    onClose={() => setEditProfileOpen(false)} // Close modal when user is done editing
+                    user={selectedUser}
+                    onClose={() => setEditProfileOpen(false)}
                 />
             )}
+
+            <RevertBillsModal
+                isOpen={isRevertModalOpen}
+                onClose={() => setIsRevertModalOpen(false)}
+                onConfirm={handleDeleteBills}
+            />
+
+            <ToastModal
+                isOpen={isToastOpen}
+                onClose={() => setIsToastOpen(false)}
+                type={toastConfig.type}
+                message={toastConfig.message}
+            />
         </div>
     );
 }

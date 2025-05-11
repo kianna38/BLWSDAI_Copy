@@ -4,6 +4,7 @@ import { Combobox } from '@headlessui/react';
 import { useState } from 'react';
 import { useCreateReading } from '@/hooks/useReading';
 import { useFilterConsumers } from '@/hooks/useConsumer';
+import ToastModal from './ToastModal';
 
 export default function AddReadingModal({ isOpen, setIsOpen }) {
     const { createReadingMutation } = useCreateReading();
@@ -11,6 +12,10 @@ export default function AddReadingModal({ isOpen, setIsOpen }) {
     const [consumerSearch, setConsumerSearch] = useState('');
     const [selectedConsumerId, setSelectedConsumerId] = useState('');
     const [inputPresentReading, setInputPresentReading] = useState('');
+    const [touched, setTouched] = useState({});
+    const [submitAttempted, setSubmitAttempted] = useState(false);
+    const [isToastOpen, setIsToastOpen] = useState(false);
+    const [toastConfig, setToastConfig] = useState({ type: 'success', message: '' });
 
     if (!isOpen) return null;
 
@@ -19,12 +24,17 @@ export default function AddReadingModal({ isOpen, setIsOpen }) {
         return fullName.includes(consumerSearch.toLowerCase());
     }) || [];
 
-    const handleSubmit = () => {
-        if (!selectedConsumerId || !inputPresentReading) {
-            alert('Fill all fields.');
-            return;
-        }
+    // Validation
+    const errors = {};
+    if (!selectedConsumerId) errors.selectedConsumerId = "Consumer is required";
+    if (!inputPresentReading) errors.inputPresentReading = "Present reading is required";
+    else if (isNaN(inputPresentReading) || Number(inputPresentReading) < 0) errors.inputPresentReading = "Must be a positive number";
 
+    const isValid = Object.keys(errors).length === 0;
+
+    const handleSubmit = () => {
+        setSubmitAttempted(true);
+        if (!isValid) return;
         const today = new Date();
         const monthYearDate = new Date(today.getFullYear(), today.getMonth(), 1);
 
@@ -34,54 +44,107 @@ export default function AddReadingModal({ isOpen, setIsOpen }) {
             monthYear: monthYearDate.toISOString(),
         }, {
             onSuccess: () => {
-                alert('Reading added!');
+                setToastConfig({
+                    type: 'success',
+                    message: 'Reading created successfully!'
+                });
+                setIsToastOpen(true);
                 setIsOpen(false);
                 setSelectedConsumerId('');
                 setInputPresentReading('');
+                setTouched({});
+                setSubmitAttempted(false);
             },
-            onError: () => alert('Error adding reading.')
+            onError: () => {
+                setToastConfig({
+                    type: 'error',
+                    message: 'Error creating reading.'
+                });
+                setIsToastOpen(true);
+            }
         });
     };
 
     return (
-        <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
-            <div className="bg-white p-6 rounded-lg w-full max-w-md">
-                <h2 className="text-xl font-bold mb-4 text-center">Add New Reading</h2>
+        <>
+            <div className="fixed inset-0 flex justify-center items-center bg-black/30 z-50">
+                <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md border border-slate-200">
+                    <h2
+                        className="text-2xl font-extrabold mb-8 text-center tracking-tight"
+                        style={{ color: '#fb8500' }}
+                    >
+                        Add New Reading
+                    </h2>
 
-                <Combobox value={selectedConsumerId} onChange={setSelectedConsumerId}>
-                    <div className="relative">
-                        <Combobox.Input
-                            className="w-full border rounded px-3 py-2 mb-2"
-                            placeholder="Search consumer..."
-                            onChange={(e) => setConsumerSearch(e.target.value)}
-                        />
-                        <Combobox.Options className="absolute mt-1 w-full bg-white shadow max-h-60 overflow-y-auto">
-                            {filteredConsumers.map(c => (
-                                <Combobox.Option key={c.consumerId} value={c.consumerId} className="px-4 py-2 hover:bg-cyan-100 cursor-pointer">
-                                    {c.lastName}, {c.firstName}
-                                </Combobox.Option>
-                            ))}
-                        </Combobox.Options>
+                    {/* Consumer Combobox */}
+                    <div className="relative mb-6">
+                        <Combobox value={selectedConsumerId} onChange={setSelectedConsumerId}>
+                            <div className="relative">
+                                <Combobox.Input
+                                    className={`peer w-full border-b-2 bg-transparent px-2 pt-6 pb-1 text-base focus:outline-none focus:border-[#fb8500] transition ${errors.selectedConsumerId && (touched.selectedConsumerId || submitAttempted) ? 'border-red-500' : 'border-slate-300'}`}
+                                    placeholder=" "
+                                    onChange={(e) => setConsumerSearch(e.target.value)}
+                                    onBlur={() => setTouched(t => ({ ...t, selectedConsumerId: true }))}
+                                />
+                                <label className={`absolute left-2 top-1 text-sm text-slate-500 transition-all peer-focus:top-0 peer-focus:text-xs peer-focus:text-[#fb8500] ${selectedConsumerId && 'top-0 text-xs text-[#fb8500]'}`}>Select Consumer</label>
+                                <Combobox.Options className="absolute mt-1 w-full bg-white shadow max-h-60 overflow-y-auto z-10">
+                                    {filteredConsumers.map(c => (
+                                        <Combobox.Option key={c.consumerId} value={c.consumerId} className="px-4 py-2 hover:bg-cyan-100 cursor-pointer">
+                                            {c.lastName}, {c.firstName}
+                                        </Combobox.Option>
+                                    ))}
+                                </Combobox.Options>
+                            </div>
+                        </Combobox>
+                        {errors.selectedConsumerId && (touched.selectedConsumerId || submitAttempted) && (
+                            <p className="text-red-500 text-xs mt-1">{errors.selectedConsumerId}</p>
+                        )}
                     </div>
-                </Combobox>
 
-                <input
-                    type="number"
-                    value={inputPresentReading}
-                    onChange={(e) => setInputPresentReading(e.target.value)}
-                    placeholder="Present Reading (m³)"
-                    className="w-full mb-4 border rounded px-3 py-2"
-                />
+                    {/* Present Reading Input */}
+                    <div className="relative mb-6">
+                        <input
+                            type="number"
+                            value={inputPresentReading}
+                            onChange={(e) => setInputPresentReading(e.target.value)}
+                            onBlur={() => setTouched(t => ({ ...t, inputPresentReading: true }))}
+                            className={`peer w-full border-b-2 bg-transparent px-2 pt-6 pb-1 text-base focus:outline-none focus:border-[#fb8500] transition ${errors.inputPresentReading && (touched.inputPresentReading || submitAttempted) ? 'border-red-500' : 'border-slate-300'}`}
+                            placeholder=" "
+                            min={0}
+                        />
+                        <label className={`absolute left-2 top-1 text-sm text-slate-500 transition-all peer-focus:top-0 peer-focus:text-xs peer-focus:text-[#fb8500] ${inputPresentReading && 'top-0 text-xs text-[#fb8500]'}`}>Present Reading (mÂ³)</label>
+                        {errors.inputPresentReading && (touched.inputPresentReading || submitAttempted) && (
+                            <p className="text-red-500 text-xs mt-1">{errors.inputPresentReading}</p>
+                        )}
+                    </div>
 
-                <div className="flex justify-end space-x-3">
-                    <button onClick={() => setIsOpen(false)} className="bg-gray-400 text-white px-4 py-2 rounded">
-                        Cancel
-                    </button>
-                    <button onClick={handleSubmit} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">
-                        Submit
-                    </button>
+                    <div className="flex justify-end gap-2 pt-2">
+                        <button
+                            type="button"
+                            onClick={() => setIsOpen(false)}
+                            className="px-4 py-2 border rounded hover:bg-gray-100 transition"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="button"
+                            style={{ backgroundColor: '#023047' }}
+                            className={`px-4 py-2 text-white rounded hover:brightness-90 transition ${!isValid ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            disabled={!isValid}
+                            onClick={handleSubmit}
+                        >
+                            Add Reading
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
+
+            <ToastModal
+                isOpen={isToastOpen}
+                onClose={() => setIsToastOpen(false)}
+                type={toastConfig.type}
+                message={toastConfig.message}
+            />
+        </>
     );
 }

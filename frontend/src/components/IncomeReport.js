@@ -95,145 +95,131 @@ export default function IncomeReport() {
 
 
     return (
-        <div className="p-5 flex flex-col gap-6">
-            {/* Header */}
-            <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold">Income Report</h2>
+        <div className="space-y-6">
+            {/* Non-printable Header */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 shadow-sm">
+                <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="flex items-center gap-2">
+                        <label className="text-sm font-medium text-black">From:</label>
+                        <input
+                            type="month"
+                            value={fromDate}
+                            onChange={(e) => setFromDate(e.target.value)}
+                            className="border border-gray-300 rounded-md px-3 py-1.5 text-sm text-black focus:outline-none focus:ring-2 focus:ring-[#fb8500] focus:border-transparent"
+                        />
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <label className="text-sm font-medium text-black">To:</label>
+                        <input
+                            type="month"
+                            value={toDate}
+                            onChange={(e) => setToDate(e.target.value)}
+                            className="border border-gray-300 rounded-md px-3 py-1.5 text-sm text-black focus:outline-none focus:ring-2 focus:ring-[#fb8500] focus:border-transparent"
+                        />
+                    </div>
+                </div>
                 <button
                     onClick={openCreateModal}
-                    className="flex items-center gap-2 bg-blue-500 text-white px-4 py-1 rounded-md hover:bg-blue-600 transition"
+                    className="inline-flex items-center gap-2 bg-[#fb8500] text-white px-4 py-2 rounded-md hover:bg-[#fb8500]/90 transition-colors text-sm font-medium"
                 >
                     <span className="text-lg">＋</span> Add Other Expenses
                 </button>
             </div>
 
-            {/* Date Picker and Generate */}
-            <div className="flex flex-wrap justify-center items-center gap-4">
-                <label className="flex items-center gap-2 font-medium">
-                    FROM
-                    <input
-                        type="month"
-                        value={fromDate}
-                        onChange={(e) => setFromDate(e.target.value)}
-                        className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    />
-                </label>
-
-                <label className="flex items-center gap-2 font-medium">
-                    TO
-                    <input
-                        type="month"
-                        value={toDate}
-                        onChange={(e) => setToDate(e.target.value)}
-                        className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    />
-                </label>
-
-            </div>
-
-            {/* Main Income Report Summary */}
-            <div ref={incomeReportPrint} className="border border-slate-300 p-5 rounded space-y-5 shadow-lg">
-
-                <div className="border border-slate-300 p-6 rounded-md shadow">
-                    <h3 className="text-lg font-bold text-center mb-2">Income Report</h3>
-                    <p className="text-center mb-6">
-                        {new Date(fromDate).toLocaleString('default', { month: 'long', year: 'numeric' })} to{" "}
-                        {new Date(toDate).toLocaleString('default', { month: 'long', year: 'numeric' })}
-                    </p>
-
-                    <div className="space-y-2 mx-2 md:mx-8">
-                        <div className="flex justify-between">
-                            <span>Total Collected Money:</span>
-                            <span className="font-semibold text-green-400">Php {incomeData.totalCollectedMoney?.toLocaleString()}</span>
+            {/* Printable Content */}
+            <div ref={incomeReportPrint} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Income Summary Card */}
+                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Income Summary</h3>
+                    <div className="space-y-4">
+                        <div className="flex justify-between items-center">
+                            <span className="text-gray-600">Total Collected Money</span>
+                            <span className="font-semibold text-green-600">₱{incomeData.totalCollectedMoney?.toLocaleString()}</span>
                         </div>
-
-                        <div className="flex justify-between">
-                            <span>Mother Meter Bill:</span>
-                            <span className="font-semibold text-red-400">Php {incomeData.motherMeterBill?.toLocaleString()}</span>
+                        <div className="flex justify-between items-center">
+                            <span className="text-gray-600">Mother Meter Bill</span>
+                            <span className="font-semibold text-red-600">₱{incomeData.motherMeterBill?.toLocaleString()}</span>
                         </div>
-
-                        <div className="flex justify-between">
-                            <span>Staff Salary:</span>
-                            <span className="font-semibold text-red-400">Php {incomeData.staffSalary?.toLocaleString()}</span>
+                        <div className="flex justify-between items-center">
+                            <span className="text-gray-600">Staff Salary</span>
+                            <span className="font-semibold text-red-600">₱{incomeData.staffSalary?.toLocaleString()}</span>
                         </div>
-
-                        <div className="flex justify-between">
-                            <span>Other Expenses:</span>
-                            <span className="font-semibold text-red-400">Php {incomeData.otherExpenses?.toLocaleString()}</span>
+                        <div className="flex justify-between items-center">
+                            <span className="text-gray-600">Other Expenses</span>
+                            <span className="font-semibold text-red-600">₱{incomeData.otherExpenses?.toLocaleString()}</span>
                         </div>
-
-                        <div className="flex justify-between font-bold pt-4">
-                            <span>Total Monthly Income:</span>
-                            <span
-                                className={`font-semibold ${incomeData.totalIncome > 0
-                                        ? "text-green-500"
+                        <div className="pt-4 border-t border-gray-200">
+                            <div className="flex justify-between items-center">
+                                <span className="text-gray-900 font-medium">Total Monthly Income</span>
+                                <span className={`font-bold text-lg ${
+                                    incomeData.totalIncome > 0
+                                        ? "text-green-600"
                                         : incomeData.totalIncome < 0
                                             ? "text-red-600"
-                                            : "text-black"
-                                    }`}
+                                            : "text-gray-900"
+                                }`}>
+                                    ₱{incomeData.totalIncome?.toLocaleString()}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Staff Salary Card */}
+                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Staff Salary</h3>
+                    <div className="space-y-3">
+                        {incomeData.staffSalaryList?.map((staff, index) => (
+                            <div key={index} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-0">
+                                <span className="text-black">{staff.position}</span>
+                                <span className="font-medium text-black">₱{staff.amount.toLocaleString()}</span>
+                            </div>
+                        ))}
+                        <div className="pt-3 border-t border-gray-200">
+                            <div className="flex justify-between items-center">
+                                <span className="font-medium text-black">Total</span>
+                                <span className="font-bold text-black">₱{incomeData.staffSalary?.toLocaleString()}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Other Expenses Card */}
+                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Other Expenses</h3>
+                    <div className="space-y-3">
+                        {incomeData.otherExpensesList?.map((expense, index) => (
+                            <div
+                                key={index}
+                                onClick={() => openEditModal(expense)}
+                                className="flex justify-between items-center py-2 px-3 rounded-md hover:bg-gray-50 cursor-pointer transition-colors"
                             >
-                                Php {incomeData.totalIncome?.toLocaleString()}
-                            </span>
-                        </div>
-
-                    </div>
-
-                </div>
-
-                {/* Staff Salary and Other Expenses Section */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Staff Salary */}
-                    <div className="border border-slate-300 p-6 rounded-md shadow">
-                        <h3 className="text-lg font-bold mb-2 text-center">Staff Salary</h3>
-                        <p className="text-center text-sm mb-4 text-gray-500">Last Update: {new Date().toLocaleDateString()}</p>
-                        <div className="space-y-2">
-                            {incomeData.staffSalaryList?.map((staff, index) => (
-                                <div key={index} className="flex justify-between">
-                                    <span>{staff.position}:</span>
-                                    <span>Php {staff.amount.toLocaleString()}</span>
+                                <span className="text-black">{expense.label}</span>
+                                <div className="flex items-center gap-4">
+                                    <span className="font-medium text-black">₱{expense.amount.toLocaleString()}</span>
+                                    <span className="text-sm text-black">{new Date(expense.date).toLocaleDateString()}</span>
                                 </div>
-                            ))}
-                            <div className="font-semibold border-t mt-2 pt-2 flex justify-between">
-                                <span>Total:</span>
-                                <span>Php {incomeData.staffSalary?.toLocaleString()}</span>
                             </div>
-                        </div>
-                    </div>
-
-                    {/* Other Expenses */}
-                    <div className="border border-slate-300 p-6 rounded-md shadow">
-                        <h3 className="text-lg font-bold mb-2 text-center">Other Expenses</h3>
-                        <div className="space-y-2">
-                            {incomeData.otherExpensesList?.map((expense, index) => (
-                                //clicking opens the edit expense
-                                <div
-                                    key={index}
-                                    className="flex justify-between text-sm cursor-pointer hover:bg-slate-100 py-1 px-2 rounded"
-                                    onClick={() => openEditModal(expense)}
-                                >
-                                    <span>{expense.label}:</span>
-                                    <div className="flex gap-4">
-                                        <span>Php {expense.amount.toLocaleString()}</span>
-                                        <span className="text-gray-500">{new Date(expense.date).toLocaleDateString()}</span>
-                                    </div>
-                                </div>
-                            ))}
-                            <div className="font-semibold border-t mt-2 pt-2 flex justify-between">
-                                <span>Total:</span>
-                                <span>Php {incomeData.otherExpenses?.toLocaleString()}</span>
+                        ))}
+                        <div className="pt-3 border-t border-gray-200">
+                            <div className="flex justify-between items-center">
+                                <span className="font-medium text-black">Total</span>
+                                <span className="font-bold text-black">₱{incomeData.otherExpenses?.toLocaleString()}</span>
                             </div>
                         </div>
                     </div>
                 </div>
-
             </div>
 
-            {/* Download PDF Button */}
+            {/* Non-printable Print Button */}
             <div className="flex justify-end">
                 <button
                     onClick={handlePrintIncomeReport}
-                    className="bg-blue-500 text-white font-semibold px-6 py-2 rounded-md shadow hover:bg-blue-600 transition"
+                    className="inline-flex items-center gap-2 bg-[#fb8500] text-white px-6 py-2 rounded-md hover:bg-[#fb8500]/90 transition-colors"
                 >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                    </svg>
                     Print Report
                 </button>
             </div>
@@ -241,60 +227,53 @@ export default function IncomeReport() {
             {/* Modal */}
             {showModal && (
                 <div className="fixed inset-0 bg-slate-500/50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg p-6 w-96 space-y-4 shadow-lg">
-                        <h2 className="text-xl font-bold">{isEditMode ? "Edit Expense" : "Add Expense"}</h2>
-
-                        <div className="flex flex-col gap-2">
-                            <label className="text-sm font-medium">Label</label>
-                            <input
-                                type="text"
-                                value={label}
-                                onChange={(e) => setLabel(e.target.value)}
-                                className="border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                            />
+                    <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4 space-y-4 shadow-lg">
+                        <h2 className="text-xl font-bold text-gray-900">{isEditMode ? "Edit Expense" : "Add Expense"}</h2>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-black mb-1">Label</label>
+                                <input
+                                    type="text"
+                                    value={label}
+                                    onChange={(e) => setLabel(e.target.value)}
+                                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-2 focus:ring-[#fb8500] focus:border-transparent"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-black mb-1">Amount</label>
+                                <input
+                                    type="number"
+                                    value={amount}
+                                    onChange={(e) => setAmount(e.target.value)}
+                                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-2 focus:ring-[#fb8500] focus:border-transparent"
+                                />
+                            </div>
                         </div>
-
-                        <div className="flex flex-col gap-2">
-                            <label className="text-sm font-medium">Amount</label>
-                            <input
-                                type="number"
-                                value={amount}
-                                onChange={(e) => setAmount(e.target.value)}
-                                className="border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                            />
-                        </div>
-
-                        <div className="flex justify-between gap-3 pt-4">
-
+                        <div className="flex justify-end gap-3 pt-4">
                             {isEditMode && (
                                 <button
                                     onClick={handleDeleteExpense}
-                                    className="px-4 py-2 rounded-md bg-red-500 text-white hover:bg-red-600"
+                                    className="px-4 py-2 text-red-600 hover:text-red-700 font-medium hover:bg-red-50 rounded-md transition-colors"
                                 >
                                     Delete
                                 </button>
                             )}
-                            <div className="space-x-2">
-                                <button
-                                    onClick={() => setShowModal(false)}
-                                    className="px-4 py-2 rounded-md bg-gray-300 hover:bg-gray-400"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={handleSaveExpense}
-                                    className="px-4 py-2 rounded-md bg-blue-500 text-white hover:bg-blue-600"
-                                >
-                                    {isEditMode ? "Update" : "Save"}
-                                </button>
-                            </div>
-                            
-
+                            <button
+                                onClick={() => setShowModal(false)}
+                                className="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSaveExpense}
+                                className="px-4 py-2 bg-[#fb8500] text-white rounded-md hover:bg-[#fb8500]/90 transition-colors"
+                            >
+                                Save
+                            </button>
                         </div>
                     </div>
                 </div>
             )}
-
         </div>
     );
 }

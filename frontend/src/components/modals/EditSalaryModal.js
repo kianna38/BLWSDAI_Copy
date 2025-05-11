@@ -58,11 +58,16 @@ const EditSalaryModal = ({ isOpen, onClose, currentSalary }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-gray-500/50 flex justify-center items-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-sm shadow-xl">
-                <h2 className="text-xl font-semibold mb-4 justify-center flex">Edit Salary</h2>
+        <div className="fixed inset-0 bg-black/30 flex justify-center items-center z-50">
+            <div className="m-4 bg-white p-8 rounded-2xl shadow-2xl w-full max-w-2xl border border-slate-200">
+                <h2
+                    className="text-3xl font-extrabold mb-8 text-center tracking-tight"
+                    style={{ color: '#fb8500' }}
+                >
+                    Edit Staff Salary
+                </h2>
 
-                <div className="">
+                <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {[
                         { label: 'President Salary', name: 'presidentSalary' },
                         { label: 'Vice President Salary', name: 'vicePresidentSalary' },
@@ -72,35 +77,39 @@ const EditSalaryModal = ({ isOpen, onClose, currentSalary }) => {
                         { label: 'Maintenance 1 Salary', name: 'maintenanceOneSalary' },
                         { label: 'Maintenance 2 Salary', name: 'maintenanceTwoSalary' },
                     ].map(({ label, name }) => (
-                        <div key={name}>
-                            <label className="block text-sm font-medium mb-1">{label}:</label>
+                        <div key={name} className="relative">
                             <input
                                 type="number"
                                 name={name}
                                 value={salaryData[name] || ''}
                                 onChange={handleChange}
-                                className="w-full p-2 mb-2 border border-gray-300 rounded"
+                                className="peer w-full border-2 bg-white px-3 py-2 rounded-lg text-base focus:outline-none focus:border-[#fb8500] transition border-gray-300 text-gray-900"
+                                required
                             />
+                            <label className="absolute left-3 -top-2.5 px-1 bg-white text-sm transition-all peer-focus:text-xs peer-focus:text-[#219ebc] peer-valid:text-xs peer-valid:text-[#219ebc] text-[#219ebc]">
+                                {label}
+                            </label>
                         </div>
                     ))}
-                </div>
 
-                <div className="flex justify-end gap-3 ">
-                    <button
-                        onClick={handleSubmit}
-                        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                    >
-                        Save
-                    </button>
-                    <button
-                        onClick={onClose}
-                        className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400"
-                    >
-                        Close
-                    </button>
-                </div>
+                    <div className="col-span-2 flex justify-end gap-4 mt-4">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="px-4 py-2 border-2 border-gray-300 rounded-lg hover:bg-gray-100 transition text-gray-700 font-medium"
+                        >
+                            Close
+                        </button>
+                        <button
+                            type="submit"
+                            style={{ backgroundColor: '#023047' }}
+                            className="px-4 py-2 text-white rounded-lg hover:brightness-90 transition font-medium"
+                        >
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
             </div>
-
         </div>
     );
 };

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using BLWSDAI.Models.DTOs;
 using BLWSDAI.Services.Interfaces;
 using System;
+using BLWSDAI.Services;
 
 public class BillService : IBillService
 {
@@ -11,17 +12,21 @@ public class BillService : IBillService
     private readonly IMotherMeterReadingService _motherMeterReadingService;
     private readonly IRatesInfoService _ratesInfoService; 
     private readonly INotificationService _notificationService;
+    private readonly IReadingService _readingService;
+
 
     public BillService(
         ApplicationDbContext context,
         IMotherMeterReadingService motherMeterReadingService,
         IRatesInfoService ratesInfoService,
-        INotificationService notificationService) // inject here
+        INotificationService notificationService,
+        IReadingService readingService) // inject here
     {
         _context = context;
         _motherMeterReadingService = motherMeterReadingService;
         _ratesInfoService = ratesInfoService;
         _notificationService = notificationService;
+        _readingService = readingService; // <-- Assign here
     }
 
     public async Task<List<Bill>> CreateBillsAsync(DateTime monthYear)
@@ -33,6 +38,8 @@ public class BillService : IBillService
         var motherMeterReading = await _context.MotherMeterReadings
             .FirstOrDefaultAsync(m => m.MonthYear == startOfMonth);
         if (motherMeterReading == null) throw new Exception("Mother meter reading not found for this month.");
+
+        //create a mother_meter_reading for next month;
 
         var consumers = await _context.Consumers
             .Include(c => c.Readings)
@@ -95,18 +102,17 @@ public class BillService : IBillService
             decimal lateAmount = totalAmount ?? 0 + rates.PenaltyRate;
             int lateServiceFee = ComputeServiceFee(lateAmount);
             decimal lateGcashAmount = lateAmount + lateServiceFee;
-            string gcashNumber = "09171234567";
+           
 
             string month = startOfMonth.ToString("MMMM yyyy");
             string smsMessage =
-                $"BLWSDAI: Your {month} bill is ₱{totalAmount:N2}. Pay with cash or via GCash/Maya to {gcashNumber} with added service fee: ₱{gcashAmount:N2}. " +
-                $"After due: ₱{lateAmount:N2} or ₱{lateGcashAmount:N2} via GCash/Maya. Avoid penalties—pay early. Thank you!";
+                $"BLWSDAI: Your {month} bill is Php{totalAmount:N2}." +
+                $"Pay early to avoid Php{rates.PenaltyRate:N0} penalty. Thank you!";
 
             string emailSubject = $"Your BLWSDAI Water Bill for {month}";
             string emailBody =
                 $"Hello {consumer.FirstName},\n\n" +
                 $"Your water bill for {month} is ₱{totalAmount:N2}.\n\n" +
-                $"If you choose to pay via GCash or Maya to {gcashNumber}, the total amount is ₱{gcashAmount:N2} (including service fee).\n\n" +
                 $"Please make your payment on or before the 20th of the month to avoid a ₱{rates.PenaltyRate:N0} late fee.\n\n" +
                 $"Pay early to avoid penalties!\n\n" +
                 $"— BLWSDAI";
@@ -142,6 +148,13 @@ public class BillService : IBillService
         }
 
         await _context.SaveChangesAsync();
+
+        await _motherMeterReadingService.CreateOrUpdateAsync(new MotherMeterReadingCreateDto
+        {
+            MonthYear = startOfMonth.AddMonths(1),
+            PresentReading = 0
+        });
+
         return bills;
     }
 
@@ -293,33 +306,55 @@ public class BillService : IBillService
 
     public async Task<bool> DeleteBillAsync(DateTime monthYear)
     {
+        var startOfMonth = new DateTime(monthYear.Year, monthYear.Month, 1, 0, 0, 0, DateTimeKind.Utc);
 
-        // Get all bills in the same month and year
+        // Step 1: Get all bills in the same month
         var billsSameMonth = await _context.Bills
             .Include(b => b.Payments)
-            .Where(b => b.MonthYear.Year == monthYear.Year &&
-                        b.MonthYear.Month == monthYear.Month &&
+            .Where(b => b.MonthYear.Year == startOfMonth.Year &&
+                        b.MonthYear.Month == startOfMonth.Month &&
                         b.MonthYear.Day == 1)
             .ToListAsync();
 
-        // Check if any bill in this month has payments
-        bool anyBillHasPayment = billsSameMonth.Any(b => b.Payments.Any());
+        if (!billsSameMonth.Any())
+            return false; // No bills to delete
 
-        // If any bill has payments, return false (do not delete)
+        // Step 2: Check if any bill has payment
+        bool anyBillHasPayment = billsSameMonth.Any(b => b.Payments.Any());
         if (anyBillHasPayment)
+            return false; // Do not delete if payments exist
+
+        // Step 3: Delete the MotherMeterReading for NEXT month
+        var nextMonth = startOfMonth.AddMonths(1);
+        var nextMonthReading = await _context.MotherMeterReadings
+            .FirstOrDefaultAsync(m => m.MonthYear.Year == nextMonth.Year &&
+                                      m.MonthYear.Month == nextMonth.Month &&
+                                      m.MonthYear.Day == 1);
+
+        if (nextMonthReading != null)
         {
-            return false;
+            _context.MotherMeterReadings.Remove(nextMonthReading);
         }
 
-        // No payments for any bill in the month, proceed to hard delete all the bills
+        // Step 4: Collect all ReadingIds linked to the bills
+        var readingIds = billsSameMonth
+            .Select(b => b.ReadingId)
+            .Distinct()
+            .ToList();
+
+        // Step 5: Delete all the bills first
         _context.Bills.RemoveRange(billsSameMonth);
+        await _context.SaveChangesAsync(); // Commit bill deletion first
 
-        // Save the changes
-        await _context.SaveChangesAsync();
+        // Step 6: Now, delete readings
+        foreach (var readingId in readingIds)
+        {
+            await _readingService.DeleteAsync(readingId);
+        }
 
-        // Return true if bills were hard deleted
         return true;
     }
+
 
 
 

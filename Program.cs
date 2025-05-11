@@ -124,18 +124,18 @@ builder.Services.AddHttpClient(); //  for Semaphore
 // Get local IP address dynamically
 string localIp = GetLocalIpAddress();
 
+// Add CORS policy for production
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowLocalFrontend", policy =>
+    options.AddPolicy("AllowProduction", policy =>
     {
-        policy.SetIsOriginAllowed(origin =>
-            origin.StartsWith("http://192.168.") ||
-            origin.StartsWith("http://10.") ||
-            origin.StartsWith("http://172.")
+        policy.WithOrigins(
+            "https://your-frontend-domain.vercel.app", // Add your Vercel domain here
+            "http://localhost:3000" // Keep local development support
         )
-            .AllowAnyHeader()             // Allow any headers
-            .AllowAnyMethod()             // Allow any HTTP method (GET, POST, PUT, DELETE, etc.)
-            .AllowCredentials();         // Allow credentials (cookies/auth headers)
+        .AllowAnyMethod()
+        .AllowAnyHeader()
+        .AllowCredentials();
     });
 });
 
@@ -151,13 +151,18 @@ builder.WebHost.ConfigureKestrel(serverOptions =>
 });
 
 var app = builder.Build();
-app.UseCors("AllowLocalFrontend");
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseCors("AllowProduction"); // Use CORS in development
+}
+else
+{
+    app.UseHttpsRedirection(); // Force HTTPS in production
+    app.UseCors("AllowProduction"); // Use CORS in production
 }
 
 app.UseDefaultFiles(); // serves index.html by default

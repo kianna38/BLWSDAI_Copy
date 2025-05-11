@@ -8,36 +8,50 @@ export default function ReportPage() {
     const [activeTab, setActiveTab] = useState("income");
 
     return (
-        <div className="bg-slate-100 text-black min-h-screen">
-            <div className="flex p-2 bg-white shadow-inner justify-between items-start">
-                <h1 className="text-2xl font-bold pl-2">Reports</h1>
+        <div className="min-h-screen bg-slate-50">
+            {/* Header */}
+            <div className="bg-white shadow-sm">
+                <div className="px-4 py-4">
+                    <h1 className="text-2xl font-bold text-gray-900">Reports</h1>
+                </div>
             </div>
 
-            {/* Tabs */}
-            <div className="flex border-b-4 border-blue-500 mt-6 mx-6 ">
-                <button
-                    className={`px-4 py-2 font-semibold rounded-t-lg ${activeTab === "income"
-                            ? "border-b-4 border-blue-500 text-white bg-blue-500"
-                            : "text-gray-600"
-                        }`}
-                    onClick={() => setActiveTab("income")}
-                >
-                    Income Report
-                </button>
-                <button
-                    className={`px-4 py-2 font-semibold ml-4 rounded-t-lg  ${activeTab === "disconnection"
-                            ? "border-b-4 border-blue-500 text-white bg-blue-500"
-                            : "text-gray-600 border-t border-l border-r"
-                        }`}
-                    onClick={() => setActiveTab("disconnection")}
-                >
-                    Disconnection Report
-                </button>
-            </div>
+            {/* Main Content */}
+            <div className="px-4 py-6">
+                {/* Tabs */}
+                <div className="border-b border-gray-200">
+                    <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+                        <button
+                            onClick={() => setActiveTab("income")}
+                            className={`
+                                whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
+                                ${activeTab === "income"
+                                    ? "border-[#023047] text-[#023047]"
+                                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                }
+                            `}
+                        >
+                            Income Report
+                        </button>
+                        <button
+                            onClick={() => setActiveTab("disconnection")}
+                            className={`
+                                whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
+                                ${activeTab === "disconnection"
+                                    ? "border-[#023047] text-[#023047]"
+                                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                }
+                            `}
+                        >
+                            Disconnection Report
+                        </button>
+                    </nav>
+                </div>
 
-            {/* Content */}
-            <div className="bg-white rounded-b-lg shadow-md mx-6">
-                {activeTab === "income" ? <IncomeReport /> : <DisconnectionReport />}
+                {/* Content */}
+                <div className="mt-6">
+                    {activeTab === "income" ? <IncomeReport /> : <DisconnectionReport />}
+                </div>
             </div>
         </div>
     );
