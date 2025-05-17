@@ -239,7 +239,7 @@ export default function BillingsAndPaymentPage() {
                                                     </div>
                                                     <div className="flex justify-between">
                                                         <span className="font-semibold text-gray-600">Amount:</span>
-                                                        <span className="text-sky-600 font-medium">₱ {bill.totalAmount}</span>
+                                                        <span className="text-sky-600 font-medium">₱ {bill.totalAmount - bill.balance} </span>
                                                     </div>
                                                     <div className="flex justify-between">
                                                         <span className="font-semibold text-gray-600">Balance:</span>
@@ -247,7 +247,7 @@ export default function BillingsAndPaymentPage() {
                                                     </div>
                                                     <div className="flex justify-between">
                                                         <span className="font-semibold text-gray-600">Total Amount:</span>
-                                                        <span className="text-green-600 font-medium">₱ {bill.totalAmount + bill.balance}</span>
+                                                        <span className="text-green-600 font-medium">₱ {bill.totalAmount}</span>
                                                     </div>
                                                     <div className="flex justify-between">
                                                         <span className="font-semibold text-gray-600">Status:</span>
@@ -274,13 +274,13 @@ export default function BillingsAndPaymentPage() {
                                                 </span>
                                             </td>
                                             <td className="hidden md:table-cell p-4 text-center">
-                                                <span className="text-sky-600 font-medium">₱ {bill.totalAmount}</span>
+                                                <span className="text-sky-600 font-medium">₱ {bill.totalAmount - bill.balance}</span>
                                             </td>
                                             <td className="hidden md:table-cell p-4 text-center">
                                                 <span className="text-red-600 font-medium">₱ {bill.balance}</span>
                                             </td>
                                             <td className="hidden md:table-cell p-4 text-center">
-                                                <span className="text-green-600 font-medium">₱ {bill.totalAmount + bill.balance}</span>
+                                                <span className="text-green-600 font-medium">₱ {bill.totalAmount}</span>
                                             </td>
                                             <td className="hidden md:table-cell p-4 text-center">
                                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${

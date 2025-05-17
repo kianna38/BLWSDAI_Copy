@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getAllBills, getBillById, generateBills, deleteBill, getBillsByMonthYear  } from '@/lib/billApi'; // Import the API functions
+import { getAllBills, getBillById, generateBills, deleteBill, getBillsByMonthYear } from '@/lib/billApi'; // Import the API functions
+import { toast } from 'react-hot-toast';
 
 // Hook to fetch all bills with filtering options
 export const useBills = (filterParams) => {
@@ -20,21 +21,6 @@ export const useBillById = (billId) => {
         queryFn: () => getBillById(billId), // Fetch data using the API
         enabled: !!billId,  // Only fetch if billId is available
     });
-
-    //return bill == null ? null : new BillReadDto
-    //{
-    //    BillId = bill.BillId,
-    //        ConsumerId = bill.ConsumerId,
-    //        ReadingId = bill.ReadingId,
-    //        MotherMeterReadingId = bill.MotherMeterReadingId,
-    //        MonthYear = bill.MonthYear,
-    //        BillingDate = bill.BillingDate,
-    //        SystemLoss = bill.SystemLoss,
-    //        Subsidy = bill.Subsidy,
-    //        Balance = bill.Balance,
-    //        TotalAmount = bill.TotalAmount,
-    //        Status = bill.Status.ToString()
-    //};
 
     return { getBill };  // Return the query result as an object
 };
@@ -57,9 +43,11 @@ export const useGenerateBills = () => {
     const generateBillsMutation = useMutation({
         mutationFn: generateBills,  // Call the API function to generate bills
         onSuccess: () => {
+            toast.success('Bills generated successfully!');
             queryClient.invalidateQueries(['MonthBills']);  // Invalidate the bills cache after successful generation
         },
         onError: (error) => {
+            toast.error('Error generating bill!');
             console.error('Error generating bills:', error);
         },
     });
@@ -75,9 +63,11 @@ export const useDeleteBill = () => {
         mutationFn: deleteBill,  // Call the API function to delete a bill
         onSuccess: () => {
             queryClient.invalidateQueries(['bills']);  // Invalidate the bills cache after deletion
+            toast.success('Bills deleted successfully!');
         },
         onError: (error) => {
             console.error('Error deleting bill:', error);
+            toast.error('Error deleting bills. Make sure that none of the bills for this month are already paid.');
         },
     });
 

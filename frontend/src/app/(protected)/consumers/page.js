@@ -111,7 +111,7 @@ export default function ConsumersPage() {
                             </span>
                         </div>
                     </div>
-                    <p className="text-xs text-gray-500 mt-2">Consumers with an active wat er connection.</p>
+                    <p className="text-xs text-gray-500 mt-2">Consumers with an active water connection.</p>
                 </div>
 
                 {/* Disconnected Consumers */}

@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getAllOtherExpenses, getOtherExpenseById, createOtherExpense, updateOtherExpense, deleteOtherExpense, filterOtherExpenses } from '@/lib/otherExpensesApi'; // Importing the API functions
+import { toast } from 'react-hot-toast';
 
 // Hook to fetch all other expenses
 export const useOtherExpenses = () => {
@@ -29,9 +30,11 @@ export const useCreateOtherExpense = () => {
         mutationFn: createOtherExpense, // API function to create an expense
         onSuccess: () => {
             queryClient.invalidateQueries(['otherExpenses']); // Invalidate the 'otherExpenses' query after creation
+            toast.success('Expense created successfully!');
         },
         onError: (error) => {
-            console.error('Error creating other expense:', error);
+            toast.error('Error creating expense!');
+            //console.error('Error creating other expense:', error);
         },
     });
     return { createExpensesMutation }; // Return the mutation object to allow destructuring
@@ -44,10 +47,12 @@ export const useUpdateOtherExpense = () => {
         mutationFn: ({ id, updatedData }) => updateOtherExpense(id, updatedData), // Update the expense
         onSuccess: () => {
             queryClient.invalidateQueries(['otherExpenses']); // Invalidate the 'otherExpenses' query after updating
-            queryClient.invalidateQueries(['otherExpense', id]); // Invalidate the single expense query
+            queryClient.invalidateQueries(['otherExpense']); // Invalidate the single expense query
+            toast.success('Expense updated successfully!');
         },
         onError: (error) => {
-            console.error('Error updating other expense:', error);
+            toast.error('Error updating expense!');
+            //console.error('Error updating other expense:', error);
         },
     });
     return { updateExpensesMutation }; // Return the mutation object to allow destructuring
@@ -60,9 +65,11 @@ export const useDeleteOtherExpense = () => {
         mutationFn: deleteOtherExpense, // API function to delete an expense
         onSuccess: () => {
             queryClient.invalidateQueries(['otherExpenses']); // Invalidate the 'otherExpenses' query after deletion
+            toast.success('Expense deleted successfully!');
         },
         onError: (error) => {
-            console.error('Error deleting other expense:', error);
+            toast.error('Error deleting expense!');
+            //console.error('Error deleting other expense:', error);
         },
     });
     return { deleteExpensesMutation }; // Return the mutation object to allow destructuring
@@ -73,20 +80,11 @@ export const useFilterOtherExpenses = () => {
     const getFilteredExpenses = useMutation({
         mutationFn: filterOtherExpenses, // Call the API function to filter other expenses
         onError: (error) => {
-            console.error('Error filtering other expenses:', error);
+            toast.error('Error filtering expense!');
+            //console.error('Error filtering other expenses:', error);
         },
     });
     return { getFilteredExpenses }; // Return the mutation object to allow destructuring
 };
 
 
-//const { data: otherExpenses, isLoading, isError } = useOtherExpenses();
-//const { data: otherExpense, isLoading, isError } = useOtherExpenseById(id);
-//const { mutate: createOtherExpense, isLoading } = useCreateOtherExpense();
-//createOtherExpense(expenseData);
-//const { mutate: updateOtherExpense, isLoading } = useUpdateOtherExpense();
-//updateOtherExpense({ id, updatedData });
-//const { mutate: deleteOtherExpense, isLoading } = useDeleteOtherExpense();
-//deleteOtherExpense(id);
-//const { mutate: filterOtherExpenses, isLoading } = useFilterOtherExpenses();
-//filterOtherExpenses(filterData);

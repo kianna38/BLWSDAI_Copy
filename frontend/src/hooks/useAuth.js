@@ -4,6 +4,8 @@ import { userApi } from '@/lib/userApi'; // API functions
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 import axios from 'axios';
+import { toast } from 'react-hot-toast';
+
 
 export const useAuth = () => {
     const { token, userId, userRole, setUser, clearUser } = useAuthStore(); // Access persisted state
@@ -34,15 +36,19 @@ export const useAuth = () => {
             const user = await userApi.getById(data.user.userId);
             if (user) {
                 queryClient.setQueryData(['user', data.user.userId], user);
+                toast.success('Logged in successfully !');
                 router.push('/dashboard');
+
             } else {
-                console.error('User not found');
+                toast.error('Login failed. User not found.');
+                //console.error('User not found');
             }
 
             return data;
         },
         onError: (error) => {
-            alert(error?.response?.data?.message || 'Login failed. Please try again.');
+            toast.error(error?.response?.data?.message || 'Login failed. Please try again.');
+            //alert(error?.response?.data?.message || 'Login failed. Please try again.');
         },
     });
 
@@ -58,11 +64,13 @@ export const useAuth = () => {
             queryClient.invalidateQueries(['user']);
         },
         onSuccess: () => {
+            toast.success('Logged out successfully');
             router.push('/');
-            console.log('Logged out successfully');
+            //console.log('Logged out successfully');
         },
         onError: (error) => {
-            console.error('Logout failed:', error);
+            toast.error('Logout failed:', error);
+            //console.error('Logout failed:', error);
         },
     });
 

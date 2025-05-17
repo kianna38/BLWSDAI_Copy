@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motherMeterApi } from '@/lib/motherMeterApi';  // Import the API functions
+import { toast } from 'react-hot-toast';
+
 
 // Hook to fetch all Mother Meter readings
 export const useMotherMeterReadings = () => {
@@ -43,9 +45,11 @@ export const useCreateUpdateMotherMeterReading = () => {
         onSuccess: () => {
             // Invalidate relevant queries to refetch data
             queryClient.invalidateQueries(['motherMeterReadings']);
+            toast.success('Mother Meter Reading for next month created successfully!');
         },
         onError: (error) => {
-            console.error('Error creating Mother Meter reading:', error);
+            toast.error('Error creating Mother Meter reading!');
+            //console.error('Error creating Mother Meter reading:', error);
         }
     });
 
@@ -63,15 +67,13 @@ export const useUpdateMotherMeterReading = () => {
             // Invalidate relevant queries to refetch data
             queryClient.invalidateQueries(['motherMeterReadings']);
             queryClient.invalidateQueries(['motherMeterReading', id]);
+            toast.success('Mother Meter Reading updated successfully!');
         },
         onError: (error) => {
-            console.error('Error updating Mother Meter reading:', error);
+            toast.error('Error updating Mother Meter reading!');
+            //console.error('Error updating Mother Meter reading:', error);
         }
     });
-
-//    Input: public class ReadingUpdateDto {
-//        public decimal PresentReading { get; set; }
-//}
 
     return { updateReadingMutation };  // Return the mutation result as an object
 };
@@ -83,14 +85,6 @@ export const useSystemLoss = (monthYear) => {
         queryFn: () => motherMeterApi.getSystemLoss(monthYear), // Fetch system loss data
         enabled: !!monthYear, // Only fetch if monthYear is available
     });
-
-    //return new BaseSystemLossResultDto
-    //{
-    //    MotherUsed = motherUsed,
-    //        ConsumerUsed = sumConsumer,
-    //        MotherRate = rates.MotherMeterCubicMeterRate,
-    //        BaseSystemLoss = systemLoss
-    //};
 
     return { systemLossQuery };  // Return the query result as an object
 };

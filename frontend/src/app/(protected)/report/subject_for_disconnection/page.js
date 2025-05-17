@@ -14,7 +14,7 @@ export default function DisconnectionReport() {
     const router = useRouter();
 
     const { data: indvReport, isLoading: indvReportIsLoading, isError: indvReportError } = useIndividualDisconnectionReport(consumerId);
-    const { notifyDisconnectionMutation, isToastOpen, setIsToastOpen, toastConfig } = notifyIndvDisconnection();
+    const { notifyDisconnectionMutation, isToastOpen, setIsToastOpen, toastConfig, isPending } = notifyIndvDisconnection();
 
     const printRef = useRef();
 
@@ -42,6 +42,8 @@ export default function DisconnectionReport() {
         if (!notifPref) return "";
         return notifPref.replace(/_/g, " ").replace(/SMS/g, "SMS").replace(/Email/g, "Email");
     };
+
+    console.log(indvReport);
 
     return (
         <div className="bg-slate-100 text-black min-h-screen">
@@ -107,7 +109,14 @@ export default function DisconnectionReport() {
                         </div>
                         <div>
                             <p className="text-gray-500 font-semibold mb-1">Total Balance</p>
-                            <p className="font-bold text-red-600 text-lg">₱{indvReport.totalBalance?.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                            <p className="font-bold text-red-600 text-lg">
+                                ₱{
+                                    indvReport?.bills?.reduce(
+                                        (sum, bill) => sum + (bill.totalAmount - (bill.balance ?? 0)),
+                                        0
+                                    ).toFixed(2)
+                                }
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -123,7 +132,7 @@ export default function DisconnectionReport() {
                                 <tr>
                                     <th className="px-6 py-3 text-center">Billing Month</th>
                                     <th className="px-6 py-3 text-center">Cubic Used</th>
-                                    <th className="px-6 py-3 text-center">Total Amount</th>
+                                    <th className="px-6 py-3 text-center">Balance</th>
                                     <th className="px-6 py-3 text-center">Status</th>
                                 </tr>
                             </thead>
@@ -132,7 +141,8 @@ export default function DisconnectionReport() {
                                     <tr key={index} className="hover:bg-gray-50 transition-colors">
                                         <td className="px-6 py-4 text-center">{bill.billingMonth}</td>
                                         <td className="px-6 py-4 text-center text-cyan-600 font-semibold">{bill.cubicUsed} m³</td>
-                                        <td className="px-6 py-4 text-center text-green-600 font-semibold">₱{bill.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                                        <td className="px-6 py-4 text-center text-yellow-600 font-semibold">₱{(bill.totalAmount - bill.balance).toFixed(2)}</td>
+
                                         <td className="px-6 py-4 text-center">
                                             <span className={`font-bold ${
                                                 bill.status.toLowerCase() === "overdue"
@@ -151,6 +161,18 @@ export default function DisconnectionReport() {
                     </div>
                 </div>
             </div>
+
+            {isPending && (
+                <div className="fixed inset-0 bg-slate-500/50 flex items-center justify-center z-50">
+                    <div className="bg-white p-6 rounded-lg flex flex-col items-center gap-4">
+                        <svg className="animate-spin h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        <p className="text-center text-lg font-semibold">Sending Notification, Please Wait...</p>
+                    </div>
+                </div>
+            )}
 
             <ToastModal
                 isOpen={isToastOpen}

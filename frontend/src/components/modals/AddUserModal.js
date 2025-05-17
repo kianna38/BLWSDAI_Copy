@@ -25,7 +25,7 @@ const AddUserModal = ({ isOpen, onClose }) => {
 
     return (
         <div className={`fixed inset-0 bg-gray-500/50 flex justify-center items-center z-50 ${isOpen ? 'block' : 'hidden'}`}>
-            <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-xl">
+            <div className="bg-white text-black rounded-lg p-6 w-full max-w-md shadow-xl">
                 <h2 className="text-xl font-semibold mb-4">Add User</h2>
                 <label className="block text-sm font-medium mb-2">Name:</label>
                 <input

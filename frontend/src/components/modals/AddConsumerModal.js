@@ -54,9 +54,14 @@ export default function AddConsumerModal({ isOpen, onClose }) {
     const handleSubmit = (e) => {
         e.preventDefault();
         setSubmitAttempted(true);
+
         if (!isValid) return;
-        createConsumerMutation.mutate(formData);
-        onClose();
+
+        createConsumerMutation.mutate(formData, {
+            onSuccess: () => {
+                onClose(); //  Only close if creation succeeds
+            },
+        });
     };
 
     return isOpen ? (
@@ -145,6 +150,7 @@ export default function AddConsumerModal({ isOpen, onClose }) {
                             value={formData.phoneNumber}
                             onChange={handleChange}
                             onBlur={handleBlur}
+                            maxLength={11}
                             className={`peer w-full border-b-2 bg-transparent px-2 pt-4 pb-1 text-base focus:outline-none focus:border-[#fb8500] transition ${errors.phoneNumber && (touched.phoneNumber || submitAttempted) ? 'border-red-500' : 'border-slate-300'}`}
                             required
                             autoComplete="off"

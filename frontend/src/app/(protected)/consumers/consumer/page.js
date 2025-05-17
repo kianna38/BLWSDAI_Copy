@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';  // Fetch search params (consumerId)
-import { useConsumerById, useFilterConsumerBills } from '@/hooks/useConsumer';  // Fetch consumer by ID
+import { useConsumerById, useFilterConsumerBills } from '@/hooks/useConsumer';  // Fetch consumer by 
+import { useRatesInfo } from '@/hooks/useRatesInfo';  // Fetch consumer by ID
 import { PencilIcon, FunnelIcon, MagnifyingGlassIcon, ChevronLeftIcon, ChevronRightIcon, PlusIcon, ArrowLeftIcon, PrinterIcon, ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import EditConsumerModal from '@/components/modals/EditConsumerModal'; // Modal component for adding a consumer
 import Link from 'next/link';
@@ -12,6 +13,7 @@ const ConsumerDetailPage = () => {
     const searchParams = useSearchParams(); // For reading the query params
     const consumerId = searchParams.get('consumerId'); // Get consumerId from URL query params
     const router = useRouter();
+    const { getRatesInfo } = useRatesInfo();
 
     const [isEditModalOpen, setEditModalOpen] = useState(false);
     const [isFilterModalOpen, setFilterModalOpen] = useState(false);
@@ -266,6 +268,7 @@ const ConsumerDetailPage = () => {
                                     <th className="p-3 text-center">Balance</th>
                                     <th className="p-3 text-center">System Loss</th>
                                     <th className="p-3 text-center">Penalty</th>
+                                    <th className="p-3 text-center">Subsidy</th>
                                     <th className="p-3 text-center">Debit</th>
                                     <th className="p-3 text-center">Credit</th>
                                     <th className="p-3 text-center">Status</th>
@@ -286,11 +289,20 @@ const ConsumerDetailPage = () => {
                                                 {new Date(info.monthYear).toLocaleString('default', { month: 'long', year: 'numeric' })}
                                             </td>
                                             <td className="p-3 text-center">{info.cubicUsed} m³</td>
-                                            <td className="p-3 text-center text-sky-600">₱{info.totalAmount.toFixed(2)}</td>
+                                            <td className="p-3 text-center text-sky-600">₱{info.cubicUsed * getRatesInfo?.data?.consumerCubicMeterRate}</td>
                                             <td className="p-3 text-center text-red-600">₱{info.balance.toFixed(2)}</td>
                                             <td className="p-3 text-center text-orange-600">₱{info.systemLoss.toFixed(2)}</td>
-                                            <td className="p-3 text-center text-purple-600">₱{(info.penalty || 0).toFixed(2)}</td>
-                                            <td className="p-3 text-center text-green-600">₱{(info.totalAmount + info.balance).toFixed(2)}</td>
+                                            <td className="p-3 text-center text-purple-600">
+                                                ₱{(info.status === 'Overdue' ? getRatesInfo?.data?.penaltyRate : info.penalty || 0).toFixed(2)}
+                                            </td>
+                                            <td className="p-3 text-center text-yellow-600">₱{info.subsidy}</td>
+                                            <td className="p-3 text-center text-green-600">
+                                                ₱{(
+                                                    info.status === 'Overdue'
+                                                        ? (info.totalAmount) + (getRatesInfo?.data?.penaltyRate)
+                                                        : (info.totalAmount)
+                                                ).toFixed(2)}
+                                            </td>
                                             <td className="p-3 text-center">₱{info.amountPaid.toFixed(2)}</td>
                                             <td className="p-3 text-center">
                                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium ${

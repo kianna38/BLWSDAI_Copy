@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getAllReadings, getReadingById, getReadingsByMonthYear, createReading, updateReading, deleteReading, getReadingSummary   } from '@/lib/readingApi'; // Import the API functions
+import { toast } from 'react-hot-toast';
 
 // Hook to fetch all readings
 export const useReadings = () => {
@@ -42,9 +43,11 @@ export const useCreateReading = () => {
         onSuccess: () => {
             // Invalidate relevant queries to refetch data after creating a reading
             queryClient.invalidateQueries(['readings']);
+            toast.success('Reading created successfully!');
         },
         onError: (error) => {
-            console.error('Error creating reading:', error);
+            toast.error('Error creating reading!');
+            //console.error('Error creating reading:', error);
         }
     });
 
@@ -62,9 +65,11 @@ export const useUpdateReading = () => {
             const { readingId } = variables;  //  get it from variables
             queryClient.invalidateQueries(['readings']);
             queryClient.invalidateQueries(['reading', readingId]);
+            toast.success('Reading updated successfully!');
         },
         onError: (error) => {
-            console.error('Error updating reading:', error);
+            toast.error('Error updating reading!');
+            //console.error('Error updating reading:', error);
         }
     });
 
@@ -81,14 +86,6 @@ export const useReadingSummary = (monthYear) => {
         enabled: !!monthYear,  // Only run if monthYear is provided
     });
 
-    //return: public class ReadingSummaryDto {
-    //    public bool billGenerated { get; set; }
-    //    public int numOfActiveConsumers { get; set; }
-    //    public int numOfReadings { get; set; }
-    //    public decimal SumOfPresentReading { get; set; }
-    //    public decimal SumOfPreviousReading { get; set; }
-    //    public decimal TotalConsumerReading => SumOfPresentReading - SumOfPreviousReading;
-    //}
 
     return { readingSummaryQuery };
 };

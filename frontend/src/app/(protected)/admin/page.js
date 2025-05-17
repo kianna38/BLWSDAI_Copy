@@ -15,6 +15,7 @@ import { useDeleteUser } from '@/hooks/useUser'; // Import the delete user hook
 import EditProfileModal from '@/components/modals/EditProfileModal'; // Import the edit modal
 import RevertBillsModal from '@/components/modals/RevertBillsModal';
 import ToastModal from '@/components/modals/ToastModal';
+import { toast } from 'react-hot-toast';
 
 export default function AdminPage() {
     const { deleteUserMutation } = useDeleteUser(); // Destructure delete mutation from hook
@@ -120,21 +121,9 @@ export default function AdminPage() {
         deleteBillsMutation.mutate(monthYear, {
             onSuccess: () => {
                 setIsRevertModalOpen(false);
-                setToastConfig({
-                    type: 'success',
-                    message: 'Bills deleted successfully!'
-                });
-                setIsToastOpen(true);
             },
             onError: (error) => {
                 setIsRevertModalOpen(false);
-                setToastConfig({
-                    type: 'error',
-                    message: error?.response?.status === 400 
-                        ? 'There is no generated bill for this month'
-                        : 'Error deleting bills.'
-                });
-                setIsToastOpen(true);
             }
         });
     };
@@ -146,22 +135,7 @@ export default function AdminPage() {
             type: 'confirm',
             message: 'Are you sure you want to delete this user?',
             onConfirm: () => {
-                deleteUserMutation.mutate(userId, {
-                    onSuccess: () => {
-                        setToastConfig({
-                            type: 'success',
-                            message: 'User deleted successfully!'
-                        });
-                        setIsToastOpen(true);
-                    },
-                    onError: (error) => {
-                        setToastConfig({
-                            type: 'error',
-                            message: error?.response?.data?.message || 'Error deleting user. Please try again.'
-                        });
-                        setIsToastOpen(true);
-                    }
-                });
+                deleteUserMutation.mutate(userId);
             },
             onCancel: () => {
                 setUserToDelete(null);
@@ -271,6 +245,7 @@ export default function AdminPage() {
                                 { label: 'Mother Meter Cubic Meter Rate', value: getRatesInfo?.data?.motherMeterCubicMeterRate },
                                 { label: 'Penalty Rate', value: getRatesInfo?.data?.penaltyRate },
                                 { label: 'Subsidy Rate', value: getRatesInfo?.data?.subsidyRate },
+                                { label: 'Service Fee Rate  (per ₱100)', value: getRatesInfo?.data?.serviceFeeRate },
                             ].map((item, idx) => (
                                 <div key={item.label} className="flex items-center justify-between py-2 gap-2">
                                     <span className="flex items-center gap-1 text-gray-700 font-medium">
@@ -455,6 +430,8 @@ export default function AdminPage() {
                 onClose={() => setIsToastOpen(false)}
                 type={toastConfig.type}
                 message={toastConfig.message}
+  onConfirm={toastConfig.onConfirm}
+  onCancel={toastConfig.onCancel}
             />
         </div>
     );

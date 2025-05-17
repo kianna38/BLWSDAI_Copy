@@ -7,6 +7,7 @@ const EditRatesModal = ({ isOpen, onClose, currentRates }) => {
         motherMeterCubicMeterRate: currentRates.motherMeterCubicMeterRate,
         penaltyRate: currentRates.penaltyRate,
         subsidyRate: currentRates.subsidyRate,
+        serviceFeeRate: currentRates.serviceFeeRate,
     });
 
     const { updateRatesInfo } = useUpdateRatesInfo();
@@ -42,6 +43,7 @@ const EditRatesModal = ({ isOpen, onClose, currentRates }) => {
                         { label: 'Mother Meter Rate', name: 'motherMeterCubicMeterRate' },
                         { label: 'Penalty Rate', name: 'penaltyRate' },
                         { label: 'Subsidy Rate', name: 'subsidyRate' },
+                        { label: 'Service Fee Rate (per Php100)', name: 'serviceFeeRate' },
                     ].map(({ label, name }) => (
                         <div key={name} className="relative">
                             <input

@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { userApi } from '@/lib/userApi'; // API functions
+import { toast } from 'react-hot-toast';
+
 
 export const useUsers = () => {
     const queryClient = useQueryClient();
@@ -32,9 +34,11 @@ export const useCreateUser = () => {
         mutationFn: userApi.createUser,
         onSuccess: () => {
             queryClient.invalidateQueries(['users']); // Invalidate the users query after creation
+            toast.success('User created successfully!');
         },
         onError: (error) => {
-            console.error('Error creating user:', error);
+            toast.success('Error creating user!');
+            //console.error('Error creating user:', error);
         },
     });
 
@@ -49,9 +53,11 @@ export const useUpdateUser = () => {
         onSuccess: () => {
             queryClient.invalidateQueries(['users']);
             queryClient.invalidateQueries(['user']); // Invalidate single user data if needed
+            toast.success('User updated successfully!');
         },
         onError: (error) => {
-            console.error('Error updating user:', error);
+            toast.success('Error updating user!');
+            //console.error('Error updating user:', error);
         },
     });
 
@@ -61,14 +67,16 @@ export const useUpdateUser = () => {
 // Delete User
 export const useDeleteUser = () => {
     const queryClient = useQueryClient();
-
+    console.log('here');
     const deleteUserMutation = useMutation({
         mutationFn: userApi.deleteUser,
         onSuccess: () => {
             queryClient.invalidateQueries(['users']); // Invalidate users list after deletion
+            toast.success('User deleted successfully!');
         },
         onError: (error) => {
             console.error('Error deleting user:', error);
+            toast.success('Error deleting user!');
         },
     });
 

@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { salaryInfoApi } from '@/lib/salaryInfoApi'; // Import the salary API functions
+import { toast } from 'react-hot-toast';
+
 
 // Hook to fetch the latest salary info
 export const useLatestSalary = () => {
@@ -33,21 +35,14 @@ export const useCreateOrUpdateSalary = () => {
             // Invalidate the queries to refetch salary data after mutation
             queryClient.invalidateQueries(['latestSalary']);
             queryClient.invalidateQueries(['salaryHistory']);
+            toast.success('Salary information updated successfully!');
+
         },
         onError: (error) => {
-            console.error('Error creating/updating salary info:', error);
+            //console.error('Error creating/updating salary info:', error);
+            toast.success('Error updating salary information!');
         },
     });
 
     return { createOrUpdateSalaryMutation };
 };
-
-
-//// Fetch the latest salary info
-//const { data: latestSalary, isLoading: loadingLatest } = useLatestSalary().latestSalaryQuery;
-
-//// Fetch the salary history
-//const { data: salaryHistory, isLoading: loadingHistory } = useSalaryHistory().salaryHistoryQuery;
-
-//// Mutation for creating or updating salary info
-//const { mutate: updateSalary, isLoading: saving } = useCreateOrUpdateSalary().createOrUpdateSalaryMutation;

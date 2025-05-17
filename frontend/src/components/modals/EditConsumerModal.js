@@ -59,10 +59,24 @@ export default function EditConsumerModal({ isOpen, onClose, consumer }) {
     const handleSubmit = (e) => {
         e.preventDefault();
         setSubmitAttempted(true);
+
         if (!isValid) return;
-        updateConsumerMutation.mutate({ id: consumer.consumerId, consumerData: formData });
-        onClose();
+
+        updateConsumerMutation.mutate(
+            { id: consumer.consumerId, consumerData: formData },
+            {
+                onSuccess: () => {
+                    onClose(); //  Only close modal if update is successful
+                },
+                // Optional: you can also handle error toast here if needed
+                onError: (error) => {
+                    console.error('Update failed:', error);
+                    // Show toast or form error if needed
+                }
+            }
+        );
     };
+
 
     // Handle input changes
     const handleChange = (e) => {

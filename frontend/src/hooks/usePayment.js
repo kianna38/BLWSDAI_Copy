@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getAllPayments, getPaymentById, createPayment, updatePayment, deletePayment, filterPayments  } from '@/lib/paymentApi'; // Import the payment API functions
+import { toast } from 'react-hot-toast';
 
 // Hook to fetch all payments
 export const usePayments = () => {
@@ -29,9 +30,11 @@ export const useCreatePayment = () => {
         mutationFn: createPayment, // API function to create a new payment
         onSuccess: () => {
             queryClient.invalidateQueries(['payments']); // Invalidate the 'payments' query after creation
+            toast.success('Payment created successfully!');
         },
         onError: (error) => {
-            console.error('Error creating payment:', error);
+            toast.success('Error creating Payment!');
+            //console.error('Error creating payment:', error);
         },
     });
     return { createPaymentMutation }; // Return the mutation object to allow destructuring
@@ -45,9 +48,11 @@ export const useUpdatePayment = () => {
         onSuccess: () => {
             queryClient.invalidateQueries(['payments']); // Invalidate the 'payments' query after updating
             queryClient.invalidateQueries(['payment', id]); // Invalidate the single payment query
+            toast.success('Payment updated successfully!');
         },
         onError: (error) => {
-            console.error('Error updating payment:', error);
+            //console.error('Error updating payment:', error);
+            toast.success('Error updating Payment!');
         },
     });
     return { updatePaymentMutationn }; // Return the mutation object to allow destructuring
@@ -61,9 +66,11 @@ export const useDeletePayment = () => {
         onSuccess: () => {
             queryClient.invalidateQueries(['payments']);
             queryClient.invalidateQueries(['payment']); // Invalidate the 'payments' query after deletion
+            toast.success('Payment deleted successfully!');
         },
         onError: (error) => {
-            console.error('Error deleting payment:', error);
+            //console.error('Error deleting payment:', error);
+            toast.success('Error deleting Payment!');
         },
     });
     return { deletePaymentMutation }; // Return the mutation object to allow destructuring

@@ -47,6 +47,8 @@ export default function DisconnectionReport() {
         );
     }
 
+    console.log(genReport.consumer);
+
     return (
         <div className="space-y-6">
             {/* Header with Date Picker */}
@@ -86,7 +88,7 @@ export default function DisconnectionReport() {
                                 <th className="px-6 py-3 text-black font-medium">Name</th>
                                 <th className="px-6 py-3 text-black font-medium">Purok</th>
                                 <th className="px-6 py-3 text-black font-medium">Meter No.</th>
-                                <th className="px-6 py-3 text-right text-black font-medium">Balance</th>
+                                <th className="px-6 py-3 text-right text-black font-medium">Balance with Penalty</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">

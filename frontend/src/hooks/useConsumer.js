@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { consumerApi } from '@/lib/consumerApi';  // Import the API functions
+import { toast } from 'react-hot-toast';
+
 
 // Hook to fetch all consumers with pagination
 export const useConsumers = (page = 1, pageSize = 20) => {
@@ -31,10 +33,11 @@ export const useCreateConsumer = () => {
         mutationFn: consumerApi.createConsumer,  // Call the API to create a new consumer
         onSuccess: () => {
             queryClient.invalidateQueries(['consumers']);  // Invalidate queries related to consumers
+            toast.success('Consumer created successfully!');
         },
         onError: (error) => {
-            alert('Duplicate Email or Meter Number.');
-            console.error('Error creating consumer:', error);
+            toast.error('Duplicate Email, Meter Number, or Contact Number');
+            //console.error('Error creating consumer:', error);
         },
     });
 
@@ -50,10 +53,11 @@ export const useUpdateConsumer = () => {
         onSuccess: () => {
             queryClient.invalidateQueries(['consumers']);
             queryClient.invalidateQueries(['consumer']);  // Invalidate the cache for the updated consumer
+            toast.success('Consumer updates successfully!');
         },
         onError: (error) => {
-            alert('Duplicate Email or Meter Number.');
-            console.error('Error updating consumer:', error);
+            toast.error('Duplicate Email, Meter Number, or Contact Number');
+            //console.error('Error updating consumer:', error);
         },
     });
 
@@ -68,9 +72,11 @@ export const useDeleteConsumer = () => {
         mutationFn: (id) => consumerApi.deleteConsumer(id),  // Call the API to delete a consumer
         onSuccess: () => {
             queryClient.invalidateQueries(['consumers']);  // Invalidate the consumers cache after deletion
+            toast.success('Consumer deleted successfully!');
         },
         onError: (error) => {
-            console.error('Error deleting consumer:', error);
+            toast.error('Error deleting consumer!');
+            //console.error('Error deleting consumer:', error);
         },
     });
 
@@ -84,19 +90,6 @@ export const useFilterConsumers = (filter) => {
         queryFn: () => consumerApi.filterConsumers(filter),  // Pass the filter to the API function
         enabled: !!filter,  // Only run the query when filter is provided
     });
-
-    //Input: public class ConsumerFilterDto {
-    //    public List<PurokEnum>? Puroks { get; set; }
-    //    public List < ConsumerStatusEnum >? Statuses { get; set; }
-    //    public List < NotifPrefEnum >? NotifPreferences { get; set; }
-
-    //    public string ? SortBy { get; set; } = "createdAt";
-    //    public string SortDir { get; set; } = "asc";
-
-    //    public int Page { get; set; } = 1;
-    //    public int PageSize { get; set; } = 10;
-    //}
-
     return { data, isLoading, error };  // Return as an object
 };
 

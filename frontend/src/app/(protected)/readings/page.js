@@ -10,6 +10,8 @@ import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';  // Fetch search params (consumerId)
 import { Combobox } from '@headlessui/react';
 import ToastModal from '@/components/modals/ToastModal';
+import { toast } from 'react-hot-toast';
+
 
 export default function ReadingsPage() {
     const today = new Date();
@@ -186,11 +188,7 @@ export default function ReadingsPage() {
 
     const handleSubmitCreateReading = () => {
         if (!selectedConsumerId || !inputPresentReading) {
-            setToastConfig({
-                type: 'error',
-                message: 'Please select a consumer and enter present reading.'
-            });
-            setIsToastOpen(true);
+            toast.error('Please select a consumer and enter present reading!');
             return;
         }
 
@@ -212,67 +210,56 @@ export default function ReadingsPage() {
             onSuccess: (data) => {
                 console.log('Success data:', data);
                 if (data) {
-                    setToastConfig({
-                        type: 'success',
-                        message: 'Reading created successfully!'
-                    });
-                    setIsToastOpen(true);
                     setIsAddReadingOpen(false);
                     setSelectedConsumerId('');
                     setInputPresentReading('');
-                } else {
-                    setToastConfig({
-                        type: 'error',
-                        message: 'Something went wrong even though server replied.'
-                    });
-                    setIsToastOpen(true);
                 }
             },
             onError: (error) => {
                 console.error('Mutation Error:', error);
-                setToastConfig({
-                    type: 'error',
-                    message: 'Error creating reading'
-                });
-                setIsToastOpen(true);
             },
         });
     };
 
     const handleSubmitUpdateReading = () => {
+        console.log('consumerData');
+        console.log(readings);
+
         if (!editingReadingId || !editingPresentReading) {
-            setToastConfig({
-                type: 'error',
-                message: 'Missing data for update.'
-            });
-            setIsToastOpen(true);
+            toast.error('Missing data for update!');
+            return;
+        }
+
+        const updatedPresentReading = parseFloat(editingPresentReading);
+
+        // 🔍 Find the reading being edited from the readings list
+        const currentReading = readings.find(r => r.readingId === editingReadingId);
+
+        if (!currentReading) {
+            toast.error('Reading not found.');
+            return;
+        }
+
+        // ❌ Check if new present reading is less than previous reading
+        if (updatedPresentReading < currentReading.previousReading) {
+            toast.error('Present reading must not be less than previous reading.');
             return;
         }
 
         const updatedData = {
-            presentReading: parseFloat(editingPresentReading)
+            presentReading: updatedPresentReading,
         };
 
         updateReadingMutation.mutate(
             { readingId: editingReadingId, updatedReadingData: updatedData },
             {
                 onSuccess: () => {
-                    setToastConfig({
-                        type: 'success',
-                        message: 'Reading updated successfully!'
-                    });
-                    setIsToastOpen(true);
                     setIsEditReadingOpen(false);
                     setEditingReadingId(null);
                     setEditingPresentReading('');
                 },
                 onError: (error) => {
                     console.error('Error updating reading:', error);
-                    setToastConfig({
-                        type: 'error',
-                        message: 'Error updating reading.'
-                    });
-                    setIsToastOpen(true);
                 }
             }
         );
@@ -281,11 +268,12 @@ export default function ReadingsPage() {
 
     const handleSubmitMotherMeterReading = () => {
         if (!motherMeterPresentReading) {
-            setToastConfig({
-                type: 'error',
-                message: 'Please enter a present reading.'
-            });
-            setIsToastOpen(true);
+            toast.error('Please enter a present reading!');
+            return;
+        }
+        console.log()
+        if (motherMeterPresentReading <= motherMeterReading.previousReading) {
+            toast.error('Present reading must be greater than previous reading!');
             return;
         }
 
@@ -305,33 +293,19 @@ export default function ReadingsPage() {
 
         createUpdateReadingMutation.mutate(payload, {
             onSuccess: (data) => {
-                console.log('Mother Meter Success:', data);
-                setToastConfig({
-                    type: 'success',
-                    message: 'Mother meter reading created/updated!'
-                });
-                setIsToastOpen(true);
                 setIsMotherMeterOpen(false);
                 setMotherMeterPresentReading('');
             },
             onError: (error) => {
                 console.error('Mother Meter Error:', error);
-                setToastConfig({
-                    type: 'error',
-                    message: 'Error updating mother meter reading.'
-                });
-                setIsToastOpen(true);
             },
         });
     };
 
     const handleClickGenerateBill = () => {
-        if (motherMeterReading.presentReading < totalConsumerReading) {
-            setToastConfig({
-                type: 'error',
-                message: 'Mother Meter Reading cannot be lower than Total Consumer Readings!'
-            });
-            setIsToastOpen(true);
+        var totalMotherMeterReading = motherMeterReading.presentReading - motherMeterReading.previousReading
+        if (totalMotherMeterReading < totalConsumerReading) {
+            toast.error('Total Mother Meter Reading cannot be lower than Total Consumer Readings!');
             return;
         }
 
@@ -348,21 +322,10 @@ export default function ReadingsPage() {
 
         generateBillsMutation.mutate(payload, {
             onSuccess: (data) => {
-                setIsGenerating(false);   // Hide modal manually after success
-                setToastConfig({
-                    type: 'success',
-                    message: 'Bills successfully generated!'
-                });
-                setIsToastOpen(true);
+                setIsGenerating(false);   
             },
             onError: (error) => {
-                setIsGenerating(false);   // Hide modal manually after error
-                console.error('Bills Generation:', error);
-                setToastConfig({
-                    type: 'error',
-                    message: 'Error generating Bills.'
-                });
-                setIsToastOpen(true);
+                setIsGenerating(false);   
             },
         });
     };
@@ -380,9 +343,6 @@ export default function ReadingsPage() {
             }
         });
     };
-
-
-    console.log(consumerData);
 
 
     return (
@@ -414,16 +374,20 @@ export default function ReadingsPage() {
             <div className="flex flex-col sm:flex-row gap-10 mb-0 pt-0 pb-10 px-8">
                
                 <div className="flex flex-col items-center bg-white py-6 w-2/3 px-1 md:w-1/3 rounded-lg shadow space-y-1">
-                    <div className="flex">
-                        <p className="text-sm text-center text-gray-500 mb-2">Mother Meter Reading</p>
-                        {billGenerated ?
-                            <div> </div>
-                        :
-                            <button onClick={() => setIsMotherMeterOpen(true)}>
+                    <div className="flex items-center gap-2 mb-2">
+                        <p className="text-sm text-gray-500">Mother Meter Reading</p>
+
+                        {!billGenerated && (
+                            <button
+                                onClick={() => {
+                                    setIsMotherMeterOpen(true);
+                                    setMotherMeterPresentReading(motherMeterReading?.presentReading?.toString() || '');
+                                }}
+                                title="Edit Mother Meter Reading"
+                            >
                                 <PencilIcon className="w-4 h-5 text-[#fb8500]" />
                             </button>
-                        }
-
+                        )}
                     </div>
                     <hr className="w-full border-t border-gray-300 my-2" />
 
@@ -466,7 +430,7 @@ export default function ReadingsPage() {
             <div className="flex flex-col pt-4 px-4 md:px-8 pb-10 space-y-5 border border-gray-300 rounded-md bg-white shadow-sm mx-4 md:mx-8">
                 <div className="flex flex-col justify-between items-center mt-0 mb-4 md:flex-row pt-">
                     {/* Add Reading Button */}
-                    {billGenerated ?
+                    {billGenerated || numOfReadings == numOfActiveConsumers ?
                         <div></div>
                     :
                         <div className=" ml-0 md:ml-4 mb-5 md:mb-0">
