@@ -42,7 +42,7 @@ export default function DisconnectionReport() {
     if (genReportError) {
         return (
             <div className="p-8 text-center text-red-600">
-                Error loading data. Please try again later.
+                Error loading data. Please  try again later.
             </div>
         );
     }

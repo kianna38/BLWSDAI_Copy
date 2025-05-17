@@ -204,208 +204,210 @@ export default function AdminPage() {
                 {/* Cards Section */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     {/* Staff Salary Card */}
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                        <div className="p-4">
-                            <div className="flex justify-between items-start mb-4">
+                    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-3 flex flex-col gap-2">
+                        <div className="flex justify-between items-center mb-2">
+                            <div className="flex items-center gap-3">
+                                <span className="bg-[#fb8500]/10 p-1.5 rounded-full">
+                                    <svg xmlns='http://www.w3.org/2000/svg' className='w-5 h-5 text-[#fb8500]' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 11c0-1.104.896-2 2-2s2 .896 2 2-.896 2-2 2-2-.896-2-2-2zm0 0V7m0 4v4m0 0a4 4 0 01-4 4H4m8-4a4 4 0 014 4h4' /></svg>
+                                </span>
                                 <div>
-                                    <h3 className="text-lg font-semibold text-gray-900">Staff Salary</h3>
-                                    <p className="text-sm text-gray-500 mt-1">Last updated: {formatDate(latestSalaryQuery?.data?.updatedAt)}</p>
-                                </div>
-                                <button
-                                    onClick={() => setEditSalaryOpen(true)}
-                                    className="bg-[#fb8500] text-white p-2 rounded-lg hover:bg-[#fb8500]/90 transition-colors"
-                                >
-                                    <PencilIcon className="w-5 h-5" />
-                                </button>
-                            </div>
-                            <div className="space-y-3">
-                                <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                                    <span className="text-gray-600">President</span>
-                                    <span className="font-medium text-gray-900">₱{latestSalaryQuery?.data?.presidentSalary?.toLocaleString()}</span>
-                                </div>
-                                <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                                    <span className="text-gray-600">Vice President</span>
-                                    <span className="font-medium text-gray-900">₱{latestSalaryQuery?.data?.vicePresidentSalary?.toLocaleString()}</span>
-                                </div>
-                                <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                                    <span className="text-gray-600">Secretary</span>
-                                    <span className="font-medium text-gray-900">₱{latestSalaryQuery?.data?.secretarySalary?.toLocaleString()}</span>
-                                </div>
-                                <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                                    <span className="text-gray-600">Treasurer</span>
-                                    <span className="font-medium text-gray-900">₱{latestSalaryQuery?.data?.treasurerSalary?.toLocaleString()}</span>
-                                </div>
-                                <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                                    <span className="text-gray-600">Maintenance 1</span>
-                                    <span className="font-medium text-gray-900">₱{latestSalaryQuery?.data?.maintenanceOneSalary?.toLocaleString()}</span>
-                                </div>
-                                <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                                    <span className="text-gray-600">Maintenance 2</span>
-                                    <span className="font-medium text-gray-900">₱{latestSalaryQuery?.data?.maintenanceTwoSalary?.toLocaleString()}</span>
-                                </div>
-                                <div className="flex justify-between items-center pt-3">
-                                    <span className="font-semibold text-gray-900">Total</span>
-                                    <span className="font-bold text-lg text-gray-900">₱{totalSalary?.toLocaleString()}</span>
+                                    <h3 className="text-base font-bold text-[#023047]">Staff Salary</h3>
+                                    <p className="text-[11px] text-gray-400 mt-0.5">Last updated: <span className="font-semibold text-gray-600">{formatDate(latestSalaryQuery?.data?.updatedAt)}</span></p>
                                 </div>
                             </div>
+                            <button
+                                onClick={() => setEditSalaryOpen(true)}
+                                className="bg-[#023047] text-white p-1.5 rounded-lg hover:bg-[#fb8500] transition-colors shadow"
+                            >
+                                <PencilIcon className="w-4 h-4" />
+                            </button>
+                        </div>
+                        <div className="divide-y divide-gray-100 text-sm">
+                            {[
+                                { label: 'President', value: latestSalaryQuery?.data?.presidentSalary },
+                                { label: 'Vice President', value: latestSalaryQuery?.data?.vicePresidentSalary },
+                                { label: 'Secretary', value: latestSalaryQuery?.data?.secretarySalary },
+                                { label: 'Treasurer', value: latestSalaryQuery?.data?.treasurerSalary },
+                                { label: 'Maintenance 1', value: latestSalaryQuery?.data?.maintenanceOneSalary },
+                                { label: 'Maintenance 2', value: latestSalaryQuery?.data?.maintenanceTwoSalary },
+                            ].map((item, idx) => (
+                                <div key={item.label} className="flex items-center justify-between py-2 gap-2">
+                                    <span className="flex items-center gap-1 text-gray-700 font-medium">
+                                        <span className="inline-block w-2 h-2 rounded-full" style={{ background: ['#fb8500','#023047','#2196f3','#43a047','#ff7043','#8e24aa'][idx] }}></span>
+                                        {item.label}
+                                    </span>
+                                    <span className="font-semibold text-gray-900">₱{item.value?.toLocaleString() || '0'}</span>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="flex justify-between items-center pt-2 mt-1 border-t border-gray-100">
+                            <span className="font-bold text-[#023047] text-sm">Total</span>
+                            <span className="font-extrabold text-base text-[#023047]">₱{totalSalary?.toLocaleString()}</span>
                         </div>
                     </div>
 
                     {/* Rates Card */}
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                        <div className="p-4">
-                            <div className="flex justify-between items-start mb-4">
+                    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-3 flex flex-col gap-2">
+                        <div className="flex justify-between items-center mb-2">
+                            <div className="flex items-center gap-3">
+                                <span className="bg-[#023047]/10 p-1.5 rounded-full">
+                                    <svg xmlns='http://www.w3.org/2000/svg' className='w-5 h-5 text-[#023047]' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 0V4m0 4v4m0 0a4 4 0 01-4 4H4m8-4a4 4 0 014 4h4' /></svg>
+                                </span>
                                 <div>
-                                    <h3 className="text-lg font-semibold text-gray-900">Rates</h3>
-                                    <p className="text-sm text-gray-500 mt-1">Last updated: {formatDate(getRatesInfo?.data?.updatedAt)}</p>
-                                </div>
-                                <button
-                                    onClick={() => setEditRatesOpen(true)}
-                                    className="bg-[#fb8500] text-white p-2 rounded-lg hover:bg-[#fb8500]/90 transition-colors"
-                                >
-                                    <PencilIcon className="w-5 h-5" />
-                                </button>
-                            </div>
-                            <div className="space-y-3">
-                                <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                                    <span className="text-gray-600">Consumer Cubic Meter Rate</span>
-                                    <span className="font-medium text-gray-900">₱{getRatesInfo?.data?.consumerCubicMeterRate?.toLocaleString()}</span>
-                                </div>
-                                <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                                    <span className="text-gray-600">Mother Meter Cubic Meter Rate</span>
-                                    <span className="font-medium text-gray-900">₱{getRatesInfo?.data?.motherMeterCubicMeterRate?.toLocaleString()}</span>
-                                </div>
-                                <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                                    <span className="text-gray-600">Penalty Rate</span>
-                                    <span className="font-medium text-gray-900">₱{getRatesInfo?.data?.penaltyRate?.toLocaleString()}</span>
-                                </div>
-                                <div className="flex justify-between items-center py-2">
-                                    <span className="text-gray-600">Subsidy Rate</span>
-                                    <span className="font-medium text-gray-900">₱{getRatesInfo?.data?.subsidyRate?.toLocaleString()}</span>
+                                    <h3 className="text-base font-bold text-[#023047]">Rates</h3>
+                                    <p className="text-[11px] text-gray-400 mt-0.5">Last updated: <span className="font-semibold text-gray-600">{formatDate(getRatesInfo?.data?.updatedAt)}</span></p>
                                 </div>
                             </div>
+                            <button
+                                onClick={() => setEditRatesOpen(true)}
+                                className="bg-[#023047] text-white p-1.5 rounded-lg hover:bg-[#fb8500] transition-colors shadow"
+                            >
+                                <PencilIcon className="w-4 h-4" />
+                            </button>
+                        </div>
+                        <div className="divide-y divide-gray-100 text-sm">
+                            {[
+                                { label: 'Consumer Cubic Meter Rate', value: getRatesInfo?.data?.consumerCubicMeterRate },
+                                { label: 'Mother Meter Cubic Meter Rate', value: getRatesInfo?.data?.motherMeterCubicMeterRate },
+                                { label: 'Penalty Rate', value: getRatesInfo?.data?.penaltyRate },
+                                { label: 'Subsidy Rate', value: getRatesInfo?.data?.subsidyRate },
+                            ].map((item, idx) => (
+                                <div key={item.label} className="flex items-center justify-between py-2 gap-2">
+                                    <span className="flex items-center gap-1 text-gray-700 font-medium">
+                                        <span className="inline-block w-2 h-2 rounded-full" style={{ background: ['#fb8500','#023047','#2196f3','#43a047','#ff7043','#8e24aa'][idx] }}></span>
+                                        {item.label}
+                                    </span>
+                                    <span className="font-semibold text-gray-900">₱{item.value?.toLocaleString() || '0'}</span>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </div>
 
-                {/* Users Section */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                    <div className="p-4">
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-                            <button
-                                onClick={() => setAddUserOpen(true)}
-                                className="bg-[#fb8500] text-white px-4 py-2 rounded-lg hover:bg-[#fb8500]/90 transition-colors flex items-center gap-2"
-                            >
-                                <PlusIcon className="w-5 h-5" />
-                                Add User
-                            </button>
-                            <div className="relative w-full sm:w-64">
-                                <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                                <input
-                                    type="text"
-                                    placeholder="Search users..."
-                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fb8500] focus:border-transparent"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                />
-                            </div>
+                {/* Users Table Section */}
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                        <button
+                            onClick={() => setAddUserOpen(true)}
+                            className="bg-[#fb8500] text-white px-4 py-2 rounded-lg hover:bg-[#fb8500]/90 transition-colors flex items-center gap-2"
+                        >
+                            <PlusIcon className="w-5 h-5" />
+                            Add User
+                        </button>
+                        <div className="relative w-full sm:w-64">
+                            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Search users..."
+                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fb8500] focus:border-transparent"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
                         </div>
-
-                        <div className="overflow-x-auto">
-                            <table className="w-full">
-                                <thead>
-                                    <tr className="bg-gray-50">
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID No.</th>
-                                        <th 
-                                            className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                                            onClick={() => handleSort('name')}
-                                        >
-                                            <div className="flex items-center gap-1">
-                                                Name
-                                                {filter.sortBy === 'name' && (
-                                                    filter.sortDir === 'asc' ? 
-                                                        <ChevronUpIcon className="w-4 h-4" /> : 
-                                                        <ChevronDownIcon className="w-4 h-4" />
-                                                )}
-                                            </div>
-                                        </th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                                        <th 
-                                            className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                                            onClick={() => handleSort('createdAt')}
-                                        >
-                                            <div className="flex items-center gap-1">
-                                                Created At
-                                                {filter.sortBy === 'createdAt' && (
-                                                    filter.sortDir === 'asc' ? 
-                                                        <ChevronUpIcon className="w-4 h-4" /> : 
-                                                        <ChevronDownIcon className="w-4 h-4" />
-                                                )}
-                                            </div>
-                                        </th>
-                                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
-                                    {filteredUsers.length > 0 ? (
-                                        filteredUsers.map((user) => (
-                                            <tr key={user.userId} className="hover:bg-gray-50">
-                                                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{user.userId}</td>
-                                                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{user.name}</td>
-                                                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{user.email}</td>
-                                                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{user.role}</td>
-                                                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{formatDate(user.createdAt)}</td>
-                                                <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                    <div className="flex justify-end gap-2">
-                                                        <button
-                                                            onClick={() => handleEdit(user)}
-                                                            className="text-[#fb8500] hover:text-[#fb8500]/80"
-                                                        >
-                                                            Edit
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleDelete(user.userId)}
-                                                            className="text-red-600 hover:text-red-800"
-                                                        >
-                                                            Delete
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))
-                                    ) : (
-                                        <tr>
-                                            <td colSpan="6" className="px-4 py-4 text-center text-sm text-gray-500">
-                                                No users found
+                    </div>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm text-left text-gray-700">
+                            <thead className="bg-gray-50 text-gray-600 font-semibold sticky top-0 z-10">
+                                <tr>
+                                    <th className="p-3 text-center">ID No.</th>
+                                    <th 
+                                        className="p-3 text-center cursor-pointer group hover:bg-gray-100"
+                                        onClick={() => handleSort('name')}
+                                    >
+                                        <div className="flex items-center justify-center gap-1">
+                                            Name
+                                            {filter.sortBy === 'name' && (
+                                                filter.sortDir === 'asc' ? 
+                                                    <ChevronUpIcon className="w-4 h-4" /> : 
+                                                    <ChevronDownIcon className="w-4 h-4" />
+                                            )}
+                                        </div>
+                                    </th>
+                                    <th className="p-3 text-center">Email</th>
+                                    <th className="p-3 text-center">Role</th>
+                                    <th 
+                                        className="p-3 text-center cursor-pointer group hover:bg-gray-100"
+                                        onClick={() => handleSort('createdAt')}
+                                    >
+                                        <div className="flex items-center justify-center gap-1">
+                                            Created At
+                                            {filter.sortBy === 'createdAt' && (
+                                                filter.sortDir === 'asc' ? 
+                                                    <ChevronUpIcon className="w-4 h-4" /> : 
+                                                    <ChevronDownIcon className="w-4 h-4" />
+                                            )}
+                                        </div>
+                                    </th>
+                                    <th className="p-3 text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredUsers.length > 0 ? (
+                                    filteredUsers.map((user) => (
+                                        <tr key={user.userId} className="border-t border-gray-100 hover:bg-gray-50 transition-colors duration-200">
+                                            <td className="p-3 text-center text-gray-900">{user.userId}</td>
+                                            <td className="p-3 text-center flex items-center gap-2 justify-center">
+                                                <span className="font-semibold text-gray-800">{user.name}</span>
+                                            </td>
+                                            <td className="p-3 text-center">{user.email}</td>
+                                            <td className="p-3 text-center">
+                                                <span className={`px-3 py-1 rounded-full text-xs font-bold shadow border ${
+                                                    user.role === 'Admin'
+                                                        ? 'bg-green-100 text-green-700 border-green-300'
+                                                        : 'bg-blue-100 text-blue-700 border-blue-300'
+                                                }`}>
+                                                    {user.role}
+                                                </span>
+                                            </td>
+                                            <td className="p-3 text-center">{formatDate(user.createdAt)}</td>
+                                            <td className="p-3 text-center">
+                                                <div className="flex justify-center gap-2">
+                                                    <button
+                                                        onClick={() => handleEdit(user)}
+                                                        className="bg-[#fb8500] text-white px-3 py-1 rounded-lg hover:bg-[#023047] transition-colors text-xs font-medium shadow"
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(user.userId)}
+                                                        className="bg-red-100 text-red-700 px-3 py-1 rounded-lg hover:bg-red-600 hover:text-white transition-colors text-xs font-medium shadow"
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
-                                    )}
-                                </tbody>
-                            </table>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="6" className="text-center py-6 text-gray-500">
+                                            No users found
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                    {/* Pagination */}
+                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-8">
+                        <div className="text-sm text-gray-700">
+                            Showing {start} to {end} of {total} entries
                         </div>
-
-                        {/* Pagination */}
-                        <div className="flex items-center justify-between mt-4">
-                            <div className="text-sm text-gray-700">
-                                Showing {start} to {end} of {total} entries
-                            </div>
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={() => handlePageChange(filter.page - 1)}
-                                    disabled={filter.page <= 1}
-                                    className="px-3 py-1 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                                >
-                                    <ChevronLeftIcon className="w-5 h-5" />
-                                </button>
-                                <button
-                                    onClick={() => handlePageChange(filter.page + 1)}
-                                    disabled={filter.page >= totalPages}
-                                    className="px-3 py-1 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                                >
-                                    <ChevronRightIcon className="w-5 h-5" />
-                                </button>
-                            </div>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => handlePageChange(filter.page - 1)}
+                                disabled={filter.page <= 1}
+                                className="px-3 py-1 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                            >
+                                <ChevronLeftIcon className="w-5 h-5" />
+                            </button>
+                            <button
+                                onClick={() => handlePageChange(filter.page + 1)}
+                                disabled={filter.page >= totalPages}
+                                className="px-3 py-1 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                            >
+                                <ChevronRightIcon className="w-5 h-5" />
+                            </button>
                         </div>
                     </div>
                 </div>

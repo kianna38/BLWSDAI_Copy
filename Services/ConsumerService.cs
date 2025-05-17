@@ -18,21 +18,16 @@ namespace BLWSDAI.Services
 
         public async Task<PaginatedResponse<ConsumerReadDto>> GetAllAsync(int page = 1, int pageSize = 20)
         {
-            if (page < 1) page = 1;
-            if (pageSize < 1) pageSize = 20;
-
             var query = _context.Consumers;
             var totalCount = await query.CountAsync();
 
-            var paged = await query
+            var consumers = await query
                 .OrderBy(c => c.ConsumerId)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
                 .ToListAsync();
 
             return new PaginatedResponse<ConsumerReadDto>
             {
-                Data = paged.Select(c => new ConsumerReadDto
+                Data = consumers.Select(c => new ConsumerReadDto
                 {
                     ConsumerId = c.ConsumerId,
                     FirstName = c.FirstName,
@@ -46,8 +41,8 @@ namespace BLWSDAI.Services
                     NotifPreference = c.NotifPreference,
                     CreatedAt = c.CreatedAt,
                 }).ToList(),
-                CurrentPage = page,
-                PageSize = pageSize,
+                CurrentPage = 1,
+                PageSize = totalCount,
                 TotalCount = totalCount
             };
         }
@@ -56,7 +51,7 @@ namespace BLWSDAI.Services
         public async Task<PaginatedResponse<ConsumerReadDto>> FilterAsync(ConsumerFilterDto filter)
         {
             if (filter.Page < 1) filter.Page = 1;
-            if (filter.PageSize < 1) filter.PageSize = 20;
+            if (filter.PageSize < 1) filter.PageSize = 500;
 
             var query = _context.Consumers.AsQueryable();
 
@@ -132,6 +127,7 @@ namespace BLWSDAI.Services
 
 
         public async Task<ConsumerReadDto> CreateAsync(ConsumerCreateUpdateDto dto)
+
         {
             var c = new Consumer
             {
@@ -346,3 +342,4 @@ namespace BLWSDAI.Services
 
     }
 }
+

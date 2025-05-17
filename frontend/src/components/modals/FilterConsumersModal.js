@@ -126,7 +126,7 @@ export default function FilterConsumersModal({ isOpen, onClose, onApply, filter 
                         <div className="mb-6">
                             <label className="block text-sm font-medium text-gray-700 mb-3">Notification Preference</label>
                             <div className="grid grid-cols-2 gap-2">
-                                {["SMS", "Email", "SMS_and_Email", "None"].map((notifPref) => (
+                                {["SMS", "Email", "SMS_and_Email"].map((notifPref) => (
                                     <label key={notifPref} className="relative flex items-center justify-center p-2 border rounded-lg cursor-pointer hover:bg-gray-50">
                                         <input
                                             type="checkbox"

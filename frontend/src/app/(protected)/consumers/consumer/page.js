@@ -135,51 +135,96 @@ const ConsumerDetailPage = () => {
             </div>
 
             <div className="p-4 md:p-6">
-                <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-                    <div className="print:flex print:justify-between print:items-center print:mb-4">
-                        <h1 className="text-3xl font-bold text-[#023047] mb-6 print:mb-0">
-                            {consumer.lastName}, {consumer.firstName}
-                        </h1>
-                        <div className="print:text-right">
-                            <p className="text-sm text-gray-500">Generated on: {new Date().toLocaleDateString()}</p>
+                {/* Redesigned Consumer Info Card */}
+                <div className="bg-white rounded-2xl shadow-xl p-8 mb-8 flex flex-col md:flex-row gap-8 items-center border border-gray-100">
+                    {/* Avatar/Icon */}
+                    <div className="flex-shrink-0 flex flex-col items-center">
+                        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#fb8500] to-[#023047] flex items-center justify-center text-white text-4xl font-bold shadow-lg">
+                            {consumer.firstName[0]}{consumer.lastName[0]}
                         </div>
+                        <span className="mt-2 text-sm text-gray-500 font-medium">Consumer</span>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <p className="text-gray-500 font-semibold mb-1">Meter Number</p>
-                            <p className="font-medium text-gray-800">{consumer.meterNumber}</p>
-                        </div>
-                        <div>
-                            <p className="text-gray-500 font-semibold mb-1">Purok</p>
-                            <p className="font-medium text-gray-800">{consumer.purok.replace('_', ' ')}</p>
-                        </div>
-                        <div>
-                            <p className="text-gray-500 font-semibold mb-1">Phone Number</p>
-                            <p className="font-medium text-gray-800">{consumer.phoneNumber}</p>
-                        </div>
-                        <div>
-                            <p className="text-gray-500 font-semibold mb-1">Email</p>
-                            <p className="font-medium text-gray-800">{consumer.email}</p>
-                        </div>
-                        <div>
-                            <p className="text-gray-500 font-semibold mb-1">Notification Preference</p>
-                            <p className="font-medium text-gray-800">{consumer.notifPreference}</p>
-                        </div>
-                        <div>
-                            <p className="text-gray-500 font-semibold mb-1">Status</p>
-                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                                consumer.status === 'Active' 
-                                    ? 'bg-green-100 text-green-700' 
-                                    : consumer.status === 'Disconnected'
-                                        ? 'bg-orange-100 text-orange-700'
-                                        : 'bg-red-100 text-red-700'
-                            }`}>
-                                {consumer.status}
+                    {/* Info Fields */}
+                    <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                        <div className="flex items-center gap-3">
+                            <span className="text-[#fb8500]">
+                                <svg xmlns='http://www.w3.org/2000/svg' className='w-5 h-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M16 7a4 4 0 01-8 0M12 3v4m0 0a4 4 0 01-4 4H4m8-4a4 4 0 014 4h4m-8 0v4m0 0a4 4 0 004 4h4m-8-4a4 4 0 01-4 4H4' /></svg>
                             </span>
+                            <div>
+                                <p className="text-gray-500 font-semibold text-xs">Full Name</p>
+                                <p className="font-bold text-lg text-gray-900">{consumer.lastName}, {consumer.firstName}</p>
+                            </div>
                         </div>
-                        <div>
-                            <p className="text-gray-500 font-semibold mb-1">Created At</p>
-                            <p className="font-medium text-gray-800">{formatDate(consumer.createdAt)}</p>
+                        <div className="flex items-center gap-3">
+                            <span className="text-[#fb8500]">
+                                <svg xmlns='http://www.w3.org/2000/svg' className='w-5 h-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 11c0-1.104.896-2 2-2s2 .896 2 2-.896 2-2 2-2-.896-2-2-2zm0 0V7m0 4v4m0 0a4 4 0 01-4 4H4m8-4a4 4 0 014 4h4' /></svg>
+                            </span>
+                            <div>
+                                <p className="text-gray-500 font-semibold text-xs">Meter Number</p>
+                                <p className="font-medium text-gray-800">{consumer.meterNumber}</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <span className="text-[#fb8500]">
+                                <svg xmlns='http://www.w3.org/2000/svg' className='w-5 h-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' /></svg>
+                            </span>
+                            <div>
+                                <p className="text-gray-500 font-semibold text-xs">Email</p>
+                                <p className="font-medium text-gray-800">{consumer.email}</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <span className="text-[#fb8500]">
+                                <svg xmlns='http://www.w3.org/2000/svg' className='w-5 h-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M3 5h2l.4 2M7 13h10l4-8H5.4M7 13l-1.35 2.7A2 2 0 007.48 19h9.04a2 2 0 001.83-3.3L17 13M7 13V6a1 1 0 011-1h6a1 1 0 011 1v7' /></svg>
+                            </span>
+                            <div>
+                                <p className="text-gray-500 font-semibold text-xs">Phone Number</p>
+                                <p className="font-medium text-gray-800">{consumer.phoneNumber}</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <span className="text-[#fb8500]">
+                                <svg xmlns='http://www.w3.org/2000/svg' className='w-5 h-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 0V4m0 4v4m0 0a4 4 0 01-4 4H4m8-4a4 4 0 014 4h4' /></svg>
+                            </span>
+                            <div>
+                                <p className="text-gray-500 font-semibold text-xs">Purok</p>
+                                <p className="font-medium text-gray-800">{consumer.purok.replace('_', ' ')}</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <span className="text-[#fb8500]">
+                                <svg xmlns='http://www.w3.org/2000/svg' className='w-5 h-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V4a2 2 0 10-4 0v1.341C7.67 7.165 6 9.388 6 12v2.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9' /></svg>
+                            </span>
+                            <div>
+                                <p className="text-gray-500 font-semibold text-xs">Notification Preference</p>
+                                <p className="font-medium text-gray-800">{consumer.notifPreference}</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <span className="text-[#fb8500]">
+                                <svg xmlns='http://www.w3.org/2000/svg' className='w-5 h-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'><circle cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='2' /><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 6v6l4 2' /></svg>
+                            </span>
+                            <div>
+                                <p className="text-gray-500 font-semibold text-xs">Created At</p>
+                                <p className="font-medium text-gray-800">{formatDate(consumer.createdAt)}</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <span className="text-[#fb8500]">
+                                <svg xmlns='http://www.w3.org/2000/svg' className='w-5 h-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'><circle cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='2' /><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 12l2 2 4-4' /></svg>
+                            </span>
+                            <div>
+                                <p className="text-gray-500 font-semibold text-xs">Status</p>
+                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-bold shadow-sm border ${
+                                    consumer.status === 'Active'
+                                        ? 'bg-green-100 text-green-700 border-green-300'
+                                        : consumer.status === 'Disconnected'
+                                            ? 'bg-orange-100 text-orange-700 border-orange-300'
+                                            : 'bg-red-100 text-red-700 border-red-300'
+                                }`}>
+                                    {consumer.status}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -206,6 +251,7 @@ const ConsumerDetailPage = () => {
                         <table className="w-full text-sm text-left text-gray-700">
                             <thead className="bg-gray-50 text-gray-600 font-medium">
                                 <tr>
+                                    <th className="p-3 text-center">Date Paid</th>
                                     <th 
                                         className="p-3 text-center cursor-pointer group hover:bg-gray-100"
                                         onClick={() => handleSort('monthYear')}
@@ -218,8 +264,10 @@ const ConsumerDetailPage = () => {
                                     <th className="p-3 text-center">Cubic Used</th>
                                     <th className="p-3 text-center">Amount</th>
                                     <th className="p-3 text-center">Balance</th>
-                                    <th className="p-3 text-center">Total Amount</th>
-                                    <th className="p-3 text-center">Amount Paid</th>
+                                    <th className="p-3 text-center">System Loss</th>
+                                    <th className="p-3 text-center">Penalty</th>
+                                    <th className="p-3 text-center">Debit</th>
+                                    <th className="p-3 text-center">Credit</th>
                                     <th className="p-3 text-center">Status</th>
                                 </tr>
                             </thead>
@@ -231,12 +279,17 @@ const ConsumerDetailPage = () => {
                                             onClick={() => !window.print && handleRowClick(info.consumerId, info.monthYear)}
                                             className="border-t border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors duration-200 print:border-gray-300"
                                         >
+                                            <td className="p-3 text-center text-gray-600">
+                                                {info.paymentDate ? formatDate(info.paymentDate) : '-'}
+                                            </td>
                                             <td className="p-3 text-center">
                                                 {new Date(info.monthYear).toLocaleString('default', { month: 'long', year: 'numeric' })}
                                             </td>
                                             <td className="p-3 text-center">{info.cubicUsed} m³</td>
                                             <td className="p-3 text-center text-sky-600">₱{info.totalAmount.toFixed(2)}</td>
                                             <td className="p-3 text-center text-red-600">₱{info.balance.toFixed(2)}</td>
+                                            <td className="p-3 text-center text-orange-600">₱{info.systemLoss.toFixed(2)}</td>
+                                            <td className="p-3 text-center text-purple-600">₱{(info.penalty || 0).toFixed(2)}</td>
                                             <td className="p-3 text-center text-green-600">₱{(info.totalAmount + info.balance).toFixed(2)}</td>
                                             <td className="p-3 text-center">₱{info.amountPaid.toFixed(2)}</td>
                                             <td className="p-3 text-center">
@@ -254,7 +307,7 @@ const ConsumerDetailPage = () => {
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan={7} className="text-center py-6 text-gray-500">
+                                        <td colSpan={10} className="text-center py-6 text-gray-500">
                                             No billing data available
                                         </td>
                                     </tr>
@@ -301,7 +354,7 @@ const ConsumerDetailPage = () => {
             <style jsx global>{`
                 @media print {
                     @page {
-                        size: A4;
+                        size: A4 landscape;
                         margin: 1cm;
                     }
                     body {
@@ -400,6 +453,18 @@ const ConsumerDetailPage = () => {
                     table {
                         page-break-inside: auto !important;
                         width: 100% !important;
+                        font-size: 10pt !important;
+                        border-collapse: collapse !important;
+                    }
+                    th, td {
+                        padding: 0.5rem !important;
+                        border: 1px solid #e5e7eb !important;
+                        text-align: center !important;
+                        white-space: nowrap !important;
+                    }
+                    th {
+                        background-color: #f9fafb !important;
+                        font-weight: 600 !important;
                     }
                     tr {
                         page-break-inside: avoid !important;
@@ -410,6 +475,37 @@ const ConsumerDetailPage = () => {
                     }
                     tbody {
                         display: table-row-group !important;
+                    }
+                    /* Column widths for better fit */
+                    th:nth-child(1), td:nth-child(1) { /* Date Paid */
+                        width: 10% !important;
+                    }
+                    th:nth-child(2), td:nth-child(2) { /* Billing Month */
+                        width: 12% !important;
+                    }
+                    th:nth-child(3), td:nth-child(3) { /* Cubic Used */
+                        width: 8% !important;
+                    }
+                    th:nth-child(4), td:nth-child(4) { /* Amount */
+                        width: 8% !important;
+                    }
+                    th:nth-child(5), td:nth-child(5) { /* Balance */
+                        width: 8% !important;
+                    }
+                    th:nth-child(6), td:nth-child(6) { /* System Loss */
+                        width: 8% !important;
+                    }
+                    th:nth-child(7), td:nth-child(7) { /* Penalty */
+                        width: 8% !important;
+                    }
+                    th:nth-child(8), td:nth-child(8) { /* Debit */
+                        width: 10% !important;
+                    }
+                    th:nth-child(9), td:nth-child(9) { /* Credit */
+                        width: 10% !important;
+                    }
+                    th:nth-child(10), td:nth-child(10) { /* Status */
+                        width: 8% !important;
                     }
                     /* Ensure content fits page */
                     .min-h-screen {
@@ -444,6 +540,10 @@ const ConsumerDetailPage = () => {
                     /* Ensure text is visible */
                     .text-3xl, .text-2xl, .text-sm, .text-base {
                         color: black !important;
+                    }
+                    /* Adjust overflow for table */
+                    .overflow-x-auto {
+                        overflow: visible !important;
                     }
                 }
             `}</style>

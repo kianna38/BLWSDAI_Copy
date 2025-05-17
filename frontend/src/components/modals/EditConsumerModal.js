@@ -238,7 +238,6 @@ export default function EditConsumerModal({ isOpen, onClose, consumer }) {
                                 <option value="SMS">SMS</option>
                                 <option value="Email">Email</option>
                                 <option value="SMS_and_Email">SMS and Email</option>
-                                <option value="None">None</option>
                             </select>
                             <label className={`absolute left-2 top-1 text-sm text-slate-500 transition-all peer-focus:top-0 peer-focus:text-xs peer-focus:text-[#fb8500] ${formData.notifPreference && 'top-0 text-xs text-[#fb8500]'}`}>Notification Preference</label>
                         </div>

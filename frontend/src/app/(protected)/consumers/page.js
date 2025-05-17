@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation'; // Import useRouter from Next.js
 
 export default function ConsumersPage() {
     const [isAddModalOpen, setAddModalOpen] = useState(false);
-    const [isFilterModalOpen, setFilterModalOpen] = useState(false); // State for filter modal
+    const [isFilterModalOpen, setFilterModalOpen] = useState(false);
     const [filter, setFilter] = useState({
         Puroks: [],
         Statuses: [],
@@ -17,16 +17,14 @@ export default function ConsumersPage() {
         SortBy: 'createdAt',
         SortDir: 'asc',
         Page: 1,
-        PageSize: 10, // Pagination per page
+        PageSize: 500, // Set page size to 500 consumers
     });
     const [searchQuery, setSearchQuery] = useState('');
-
-    const router = useRouter();
-    // Use the useFilterConsumers hook to get filtered data
-    const { data: consumers, isLoading, error } = useFilterConsumers(filter);
-
     const [internalSortDir, setInternalSortDir] = useState(filter.SortDir);
     const [sortColumn, setSortColumn] = useState('lastName');
+
+    const router = useRouter();
+    const { data: consumers, isLoading, error } = useFilterConsumers(filter);
 
     // Reset to page 1 if filter changes
     useEffect(() => {
@@ -113,6 +111,7 @@ export default function ConsumersPage() {
                             </span>
                         </div>
                     </div>
+                    <p className="text-xs text-gray-500 mt-2">Consumers with an active wat er connection.</p>
                 </div>
 
                 {/* Disconnected Consumers */}
@@ -125,6 +124,7 @@ export default function ConsumersPage() {
                             </span>
                         </div>
                     </div>
+                    <p className="text-xs text-gray-500 mt-2">Consumers whose connection has been temporarily disconnected.</p>
                 </div>
 
                 {/* Cut Consumers */}
@@ -137,121 +137,107 @@ export default function ConsumersPage() {
                             </span>
                         </div>
                     </div>
+                    <p className="text-xs text-gray-500 mt-2">Consumers whose connection has been permanently cut off.</p>
                 </div>
             </div>
 
-            <div className="flex flex-col pt-6 px-4 md:px-8 pb-10 space-y-6 bg-white shadow-lg rounded-xl mx-4 md:mx-8">
-                <div className="flex flex-col md:flex-row md:items-center w-full gap-4">
-                    <div className="flex flex-col md:flex-row md:items-center md:space-x-4 w-full">
-                        <button
-                            onClick={() => setFilterModalOpen(true)}
-                            className="flex items-center justify-center border border-gray-200 bg-white shadow-sm px-4 py-2.5 rounded-lg hover:bg-gray-50 hover:shadow transition-all duration-200 w-full md:w-auto"
-                        >
-                            <FunnelIcon className="w-5 h-5 text-gray-600 mr-2" /> Filter
-                        </button>
-                        <div className="relative w-full md:w-64 mt-2 md:mt-0">
-                            <MagnifyingGlassIcon className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder="Search Purok or Consumer"
-                                className="pl-10 bg-gray-50 p-2.5 rounded-lg shadow-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all duration-200"
-                                value={searchQuery}
-                                onChange={e => setSearchQuery(e.target.value)}
-                            />
+            {/* Main Container for Controls and Table */}
+            <div className="px-4 md:px-8 pb-0 mt-8">
+                <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+                    {/* Search, Filter, and Add Button Container */}
+                    <div className="p-4 border-b border-gray-100">
+                        <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+                            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                                <button
+                                    onClick={() => setFilterModalOpen(true)}
+                                    className="flex items-center justify-center border border-gray-200 bg-white shadow-sm px-4 py-2.5 rounded-lg hover:bg-gray-50 hover:shadow transition-all duration-200"
+                                >
+                                    <FunnelIcon className="w-5 h-5 text-gray-600 mr-2" /> Filter
+                                </button>
+                                <div className="relative w-full sm:w-64">
+                                    <MagnifyingGlassIcon className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search Purok or Consumer"
+                                        className="pl-10 bg-gray-50 p-2.5 rounded-lg shadow-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all duration-200"
+                                        value={searchQuery}
+                                        onChange={e => setSearchQuery(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setAddModalOpen(true)}
+                                className="bg-[#fb8500] text-white px-6 py-2.5 rounded-lg hover:bg-orange-600 flex items-center gap-2 shadow-sm hover:shadow transition-all duration-200 whitespace-nowrap w-full sm:w-auto"
+                            >
+                                <PlusIcon className="w-5 h-5 text-white" /> Add Consumer
+                            </button>
                         </div>
                     </div>
-                    <div className="flex justify-end w-full md:w-auto">
-                        <button
-                            onClick={() => setAddModalOpen(true)}
-                            className="bg-[#fb8500] text-white px-6 py-2.5 rounded-lg hover:bg-orange-600 flex items-center gap-2 shadow-sm hover:shadow transition-all duration-200 whitespace-nowrap w-full md:w-auto"
-                        >
-                            <PlusIcon className="w-5 h-5 text-white" /> Add Consumer
-                        </button>
-                    </div>
-                </div>
 
-                <div className="bg-white rounded-lg overflow-hidden">
-                    <div className="overflow-x-auto md:overflow-x-visible">
-                        <table className="w-full text-sm text-left text-gray-700">
-                            <thead className="bg-gray-100 text-gray-600 font-medium">
-                                <tr>
-                                    <th 
-                                        className="p-3 pl-6 text-left cursor-pointer hover:bg-gray-100"
-                                        onClick={() => handleSort('lastName')}
-                                    >
-                                        <div className="flex items-center gap-2">
-                                            Name
-                                            <span className={`text-sm ${sortColumn === 'lastName' ? (internalSortDir === 'asc' ? 'text-blue-500' : 'text-red-500') : 'text-gray-400'}`}>
-                                                {sortColumn === 'lastName' ? (internalSortDir === 'asc' ? '↑' : '↓') : '↕'}
-                                            </span>
-                                        </div>
-                                    </th>
-                                    <th 
-                                        className="p-3 text-center cursor-pointer hover:bg-gray-100"
-                                        onClick={() => handleSort('purok')}
-                                    >
-                                        <div className="flex items-center justify-center gap-2">
-                                            Purok
-                                            <span className={`text-sm ${sortColumn === 'purok' ? (internalSortDir === 'asc' ? 'text-blue-500' : 'text-red-500') : 'text-gray-400'}`}>
-                                                {sortColumn === 'purok' ? (internalSortDir === 'asc' ? '↑' : '↓') : '↕'}
-                                            </span>
-                                        </div>
-                                    </th>
-                                    <th className="p-3 text-center">Meter No.</th>
-                                    <th className="p-3 text-center">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filteredConsumers.length ? (
-                                    filteredConsumers.map(consumer => (
-                                        <tr
-                                            key={consumer.consumerId}
-                                            className="border-t border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors duration-200"
-                                            onClick={() => handleRowClick(consumer.consumerId)}>
-                                            <td className="p-3 pl-6 font-bold text-gray-900">{consumer.lastName}, {consumer.firstName}</td>
-                                            <td className="p-3 text-center text-gray-600">{consumer.purok.replace(/^_/, '')}</td>
-                                            <td className="p-3 text-center text-gray-600">{consumer.meterNumber}</td>
-                                            <td className="p-3 text-center">
-                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium ${
-                                                    consumer.status === 'Active' 
-                                                        ? 'bg-green-100 text-green-700' 
-                                                        : consumer.status === 'Disconnected'
-                                                            ? 'bg-orange-100 text-orange-700'
-                                                            : 'bg-red-100 text-red-700'
-                                                }`}>
-                                                    {consumer.status}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    ))
-                                ) : (
+                    {/* Consumers Table */}
+                    <div className="overflow-x-auto">
+                        <div className="max-h-[calc(100vh-350px)] overflow-y-auto">
+                            <table className="w-full">
+                                <thead className="bg-gray-200 sticky top-0">
                                     <tr>
-                                        <td colSpan={4} className="text-center py-6 text-gray-500">No consumers found</td>
+                                        <th 
+                                            className="p-3 text-left cursor-pointer hover:bg-gray-300 font-semibold text-gray-900 border-b border-gray-300"
+                                            onClick={() => handleSort('lastName')}
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                Name
+                                                <span className={`text-sm ${sortColumn === 'lastName' ? (internalSortDir === 'asc' ? 'text-blue-700' : 'text-red-700') : 'text-gray-600'}`}>
+                                                    {sortColumn === 'lastName' ? (internalSortDir === 'asc' ? '↑' : '↓') : '↕'}
+                                                </span>
+                                            </div>
+                                        </th>
+                                        <th 
+                                            className="p-3 text-center cursor-pointer hover:bg-gray-300 font-semibold text-gray-900 border-b border-gray-300"
+                                            onClick={() => handleSort('purok')}
+                                        >
+                                            <div className="flex items-center justify-center gap-2">
+                                                Purok
+                                                <span className={`text-sm ${sortColumn === 'purok' ? (internalSortDir === 'asc' ? 'text-blue-700' : 'text-red-700') : 'text-gray-600'}`}>
+                                                    {sortColumn === 'purok' ? (internalSortDir === 'asc' ? '↑' : '↓') : '↕'}
+                                                </span>
+                                            </div>
+                                        </th>
+                                        <th className="p-3 text-center font-semibold text-gray-900 border-b border-gray-300">Meter No.</th>
+                                        <th className="p-3 text-center font-semibold text-gray-900 border-b border-gray-300">Notification Preference</th>
+                                        <th className="p-3 text-center font-semibold text-gray-900 border-b border-gray-300">Status</th>
                                     </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div className="p-4 flex justify-between items-center text-sm text-gray-600 border-t border-gray-100">
-                        <div className="text-gray-500">
-                            Showing {start}-{end} of {total} entries
-                        </div>
-                        <div className="flex gap-2">
-                            <button
-                                onClick={() => setFilter((prev) => ({ ...prev, Page: prev.Page - 1 }))}
-                                disabled={filter.Page <= 1}
-                                className="px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-30 disabled:hover:bg-white transition-colors duration-200"
-                            >
-                                <ChevronLeftIcon className="w-5 h-5" />
-                            </button>
-                            <button
-                                onClick={() => setFilter((prev) => ({ ...prev, Page: prev.Page + 1 }))}
-                                disabled={filter.Page * filter.PageSize >= total}
-                                className="px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-30 disabled:hover:bg-white transition-colors duration-200"
-                            >
-                                <ChevronRightIcon className="w-5 h-5" />
-                            </button>
+                                </thead>
+                                <tbody>
+                                    {filteredConsumers.length ? (
+                                        filteredConsumers.map(consumer => (
+                                            <tr
+                                                key={consumer.consumerId}
+                                                className="border-t border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors duration-200"
+                                                onClick={() => handleRowClick(consumer.consumerId)}>
+                                                <td className="p-3 pl-6 font-bold text-gray-900">{consumer.lastName}, {consumer.firstName}</td>
+                                                <td className="p-3 text-center text-gray-600">{consumer.purok.replace(/^_/, '')}</td>
+                                                <td className="p-3 text-center text-gray-600">{consumer.meterNumber}</td>
+                                                <td className="p-3 text-center text-gray-600">{consumer.notifPreference ? consumer.notifPreference.replace(/_/g, ' ').replace('SMS and Email', 'SMS and Email') : '-'}</td>
+                                                <td className="p-3 text-center">
+                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium ${
+                                                        consumer.status === 'Active' 
+                                                            ? 'bg-green-100 text-green-700' 
+                                                            : consumer.status === 'Disconnected'
+                                                                ? 'bg-orange-100 text-orange-700'
+                                                                : 'bg-red-100 text-red-700'
+                                                    }`}>
+                                                        {consumer.status}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan={4} className="text-center py-6 text-gray-500">No consumers found</td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>

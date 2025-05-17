@@ -1,21 +1,20 @@
 import axios from 'axios';
 import useAuthStore from '@/store/useAuthStore'; // Zustand store for auth state
+import https from 'https'; // For handling self-signed certificates
 
 let baseURL = '';
 
 if (typeof window !== 'undefined') {
-    // Use environment variable in production, fallback to localhost in development
-    baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5112/api';
-}
+    const { hostname } = window.location;
+    baseURL = `http://${hostname}:5112/api`;
+} 
+
 
 // Create an Axios instance with configuration
 const api = axios.create({
     baseURL,  // Replace with your actual API URL
     withCredentials: true, // To send cookies along with requests (if required)
-    // Only use httpsAgent in development
-    ...(process.env.NODE_ENV === 'development' && {
-        httpsAgent: new (require('https').Agent)({ rejectUnauthorized: false })
-    })
+    httpsAgent: new https.Agent({ rejectUnauthorized: false }) // Ignore SSL certificate errors (only in dev)
 });
 
 // Request Interceptor to add the token to headers
