@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useUpdateUser } from '@/hooks/useUser';
 import ToastModal from './ToastModal';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { toast } from 'react-hot-toast';
 
 export default function EditProfileModal({ user, onClose }) {
     const [form, setForm] = useState({
@@ -45,11 +46,7 @@ export default function EditProfileModal({ user, onClose }) {
         // Email format validation
         const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailPattern.test(form.email)) {
-            setToastConfig({
-                type: 'error',
-                message: 'Please enter a valid email address.'
-            });
-            setIsToastOpen(true);
+            toast.error('Please enter a valid email address.');
             setSaving(false);
             return;
         }

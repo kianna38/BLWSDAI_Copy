@@ -39,13 +39,13 @@ api.interceptors.response.use(
     (error) => {
         if (error.response) {
             // If the server responded with an error
-            if (error.response.status === 401) {
-                // Token is expired or unauthorized, handle it here
-                console.error('Token expired or invalid, logging out...');
-                useAuthStore.getState().clearUser(); // Clear the user from Zustand store
-                // Optionally redirect to login page
-                window.location.href = '/'; // Redirect to login or show a login modal
-            }
+            //if (error.response.status === 401) {
+            //    // Token is expired or unauthorized, handle it here
+            //    console.error('Token expired or invalid, logging out...');
+            //    useAuthStore.getState().clearUser(); // Clear the user from Zustand store
+            //    // Optionally redirect to login page
+            //    window.location.href = '/'; // Redirect to login or show a login modal
+            //}
         } else if (error.request) {
             // If no response was received from the server
             console.error('No Response from Server:', error.request);

@@ -9,6 +9,8 @@ namespace BLWSDAI.Models.DTOs
         public decimal MotherMeterCubicMeterRate { get; set; }
         public decimal PenaltyRate { get; set; }
         public decimal SubsidyRate { get; set; }
+        public decimal ServiceFeeRate { get; set; }
+
         public DateTime UpdatedAt { get; set; }
     }
 
@@ -18,6 +20,8 @@ namespace BLWSDAI.Models.DTOs
         public decimal MotherMeterCubicMeterRate { get; set; }
         public decimal PenaltyRate { get; set; }
         public decimal SubsidyRate { get; set; }
+        public decimal ServiceFeeRate { get; set; }
+
     }
 
 

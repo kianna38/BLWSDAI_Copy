@@ -141,15 +141,17 @@ public class ReportService : IReportService
             .Select(c => new
             {
                 c.ConsumerId,
-                c.LastName,
                 c.FirstName,
+                c.LastName,
                 c.Purok,
                 c.MeterNumber,
-                TotalUnpaid = c.Bills
-                    .Where(b =>  b.Status != BillStatusEnum.Paid && b.MonthYear <= monthStart)
-                    .Sum(b => b.TotalAmount - b.Payments.Sum(p => p.AmountPaid))
+                LatestUnpaidBill = c.Bills
+                    .Where(b => b.Status != BillStatusEnum.Paid && b.MonthYear <= monthStart)
+                    .OrderByDescending(b => b.MonthYear)
+                    .Select(b => b.TotalAmount)
+                    .FirstOrDefault()
             })
-            .Where(r => r.TotalUnpaid > 1000)
+            .Where(r => r.LatestUnpaidBill > 1000)
             .OrderBy(r => r.Purok)
             .Select(r => new GeneralDisconnectionItemDto
             {
@@ -158,12 +160,13 @@ public class ReportService : IReportService
                 LastName = r.LastName,
                 Purok = r.Purok.ToString(),
                 MeterNumber = r.MeterNumber,
-                Balance = r.TotalUnpaid
+                Balance = r.LatestUnpaidBill
             })
             .ToListAsync();
 
         return report;
     }
+
 
     public async Task<IndividualDisconnectionReportDto> GetIndividualDisconnectionReportAsync(int consumerId)
     {
@@ -177,29 +180,32 @@ public class ReportService : IReportService
         if (consumer == null)
             throw new Exception("Consumer not found or inactive.");
 
-        // Determine cutoff (most recent paid bill)
+        // Get latest paid bill's month (cutoff)
         var cutoff = consumer.Bills
             .Where(b => b.Status == BillStatusEnum.Paid)
             .OrderByDescending(b => b.MonthYear)
             .Select(b => b.MonthYear)
             .FirstOrDefault();
 
-        var dueBills = consumer.Bills
-            .Where(b => (b.Status == BillStatusEnum.Overdue || b.Status == BillStatusEnum.Partial || b.Status == BillStatusEnum.Unpaid) &&
-                        (cutoff == default || b.MonthYear > cutoff))
+        // Get due bills after cutoff
+        var dueBillsRaw = consumer.Bills
+            .Where(b =>
+                (b.Status == BillStatusEnum.Unpaid || b.Status == BillStatusEnum.Partial || b.Status == BillStatusEnum.Overdue) &&
+                (cutoff == default || b.MonthYear > cutoff))
             .OrderBy(b => b.MonthYear)
-            .Select(b => new BillDetailDto
-            {
-                BillingMonth = b.MonthYear.ToString("MMMM yyyy"),
-                CubicUsed = b.Reading.PresentReading - b.Reading.PreviousReading,
-                TotalAmount = b.TotalAmount,
-                Status = b.Status
-            })
             .ToList();
 
-        decimal totalBalance = consumer.Bills
-            .Where(b => dueBills.Select(d => d.BillingMonth).Contains(b.MonthYear.ToString("MMMM yyyy")))
-            .Sum(b => b.TotalAmount - b.Payments.Sum(p => p.AmountPaid));
+        // Get latest unpaid bill (most recent)
+        var latestUnpaid = dueBillsRaw.OrderByDescending(b => b.MonthYear).FirstOrDefault();
+
+        var dueBills = dueBillsRaw.Select(b => new BillDetailDto
+        {
+            BillingMonth = b.MonthYear.ToString("MMMM yyyy"),
+            CubicUsed = b.Reading.PresentReading - b.Reading.PreviousReading,
+            TotalAmount = b.TotalAmount,
+            Balance = b.Balance,
+            Status = b.Status
+        }).ToList();
 
         return new IndividualDisconnectionReportDto
         {
@@ -211,9 +217,10 @@ public class ReportService : IReportService
             PhoneNumber = consumer.PhoneNumber ?? "N/A",
             NotificationPreference = consumer.NotifPreference.ToString(),
             Bills = dueBills,
-            TotalBalance = totalBalance
+            TotalBalance = latestUnpaid?.TotalAmount ?? 0
         };
     }
+
 
     public async Task SendDisconnectionNoticeAsync(int consumerId)
     {

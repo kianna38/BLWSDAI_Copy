@@ -46,6 +46,14 @@ namespace BLWSDAI.Data
                 .HasIndex(c => c.MeterNumber)
                 .IsUnique();
 
+            modelBuilder.Entity<Consumer>()
+                .HasIndex(c => c.Email)
+                .IsUnique();
+
+            modelBuilder.Entity<Consumer>()
+                .HasIndex(c => c.PhoneNumber)
+                .IsUnique();
+
 
             modelBuilder.Entity<Reading>()
                 .HasIndex(r => new { r.ConsumerId, r.MonthYear })

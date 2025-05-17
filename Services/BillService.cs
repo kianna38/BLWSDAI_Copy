@@ -83,14 +83,18 @@ public class BillService : IBillService
                 }
                 else if (previousBill.Status == BillStatusEnum.Unpaid)
                 {
+                    balance = previousBill.TotalAmount + rates.PenaltyRate;
                     previousBill.Status = BillStatusEnum.Overdue;
+                }
+                else if (previousBill.Status == BillStatusEnum.Overdue)
+                {
                     balance = previousBill.TotalAmount + rates.PenaltyRate;
                 }
             }
 
             var systemLoss = generalSystemLoss * cubicUsed;
             var totalAmount = (cubicUsed * rates.ConsumerCubicMeterRate) + balance + systemLoss - subsidy;
-
+            Console.WriteLine($"totalAmount {totalAmount} | cubicUsed {cubicUsed} | balance: {balance} | systemLoss: {systemLoss} | subsidy: {subsidy} | prevstatus: {previousBill?.Status}");
 
             // Notification values
             int ComputeServiceFee(decimal amount) => (int)Math.Ceiling(amount / 100);
@@ -337,20 +341,20 @@ public class BillService : IBillService
         }
 
         // Step 4: Collect all ReadingIds linked to the bills
-        var readingIds = billsSameMonth
-            .Select(b => b.ReadingId)
-            .Distinct()
-            .ToList();
+        //var readingIds = billsSameMonth
+        //    .Select(b => b.ReadingId)
+        //    .Distinct()
+        //    .ToList();
 
         // Step 5: Delete all the bills first
         _context.Bills.RemoveRange(billsSameMonth);
         await _context.SaveChangesAsync(); // Commit bill deletion first
 
-        // Step 6: Now, delete readings
-        foreach (var readingId in readingIds)
-        {
-            await _readingService.DeleteAsync(readingId);
-        }
+        //// Step 6: Now, delete readings
+        //foreach (var readingId in readingIds)
+        //{
+        //    await _readingService.DeleteAsync(readingId);
+        //}
 
         return true;
     }

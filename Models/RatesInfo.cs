@@ -20,5 +20,10 @@ public class RatesInfo
 
     [Column(TypeName = "numeric(10,2)")]
     public decimal SubsidyRate { get; set; }
+
+
+    [Column(TypeName = "numeric(10,2)")]
+    public decimal ServiceFeeRate { get; set; }
+
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }

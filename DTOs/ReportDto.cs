@@ -33,6 +33,7 @@ namespace BLWSDAI.Models.DTOs
         public string BillingMonth { get; set; } = string.Empty;
         public decimal CubicUsed { get; set; }
         public decimal TotalAmount { get; set; }
+        public decimal Balance { get; set; }
         public BillStatusEnum Status { get; set; }
     }
 
