@@ -250,5 +250,30 @@ public class UserService : IUserService
     }
 
 
+    public async Task<bool> ResetPasswordToRoleNameEmailFormatAsync(string email)
+    {
+        var user = await _context.Users
+            .Where(u => u.Email == email)
+            .FirstOrDefaultAsync();
+
+        if (user == null) return false;
+
+        // Remove spaces from name
+        var nameNoSpaces = user.Name.Replace(" ", "");
+
+        // Construct new password
+        var newPassword = $"{user.Role}.{nameNoSpaces}.{user.Email}";
+
+        // Hash and update password
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+
+        _context.Users.Update(user);
+        await _context.SaveChangesAsync();
+
+        return true;
+    }
+
+
+
 
 }

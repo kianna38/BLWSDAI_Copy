@@ -22,6 +22,13 @@ namespace BLWSDAI.Migrations
                 table: "consumers",
                 column: "phone_number",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+               name: "ix_consumers_email",
+               table: "consumers",
+               column: "email",
+               unique: true);
+
         }
 
         /// <inheritdoc />

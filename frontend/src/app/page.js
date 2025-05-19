@@ -1,4 +1,4 @@
-'use client'; // Ensuring client-side behavior
+﻿'use client'; // Ensuring client-side behavior
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -6,6 +6,8 @@ import Image from 'next/image';
 import { useAuth } from '@/hooks/useAuth'; // Import your custom useAuth hook
 import useAuthStore from '@/store/useAuthStore'; // Import Zustand store
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/solid';
+import { useResetPassword } from '@/hooks/useUser';
+
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -13,6 +15,7 @@ export default function Login() {
     const [showPassword, setShowPassword] = useState(false);
     const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
     const router = useRouter();
+    const { resetPassword } = useResetPassword();
 
     const { login, loginLoading, loginError } = useAuth(); // Use the login mutation from useAuth
     const { token, userId } = useAuthStore(); // Access Zustand state
@@ -142,24 +145,43 @@ export default function Login() {
                 <div className="fixed inset-0 bg-slate-500/50 flex items-center justify-center z-50">
                     <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full mx-4">
                         <h3 className="text-2xl text-[#fb8500] font-semibold mb-4">Reset Password</h3>
-                        <div className="mb-6">
-                            <p className="text-gray-700 mb-4">
-                                To reset your password, please contact your administrator or send an email to:
-                            </p>
-                            <a 
-                                href="mailto:blwsdai@gmail.com" 
-                                className="text-blue-600 hover:text-blue-800 font-medium"
-                            >
-                                blwsdai@gmail.com
-                            </a>
-                        </div>
-                        <div className="flex justify-end">
+                        <p className="text-sm text-gray-700 mb-4">
+                            Enter your account email below. Your password will be reset to:
+                            <br />
+                            <span className="block font-medium mt-2">
+                                <code>role.NameNoSpaces.email</code>
+                            </span>
+                            <br />
+                            <strong className="block mt-2">
+                                Example: <br />
+                                Role: Admin, Name: Maria Clara, Email: clara@example.com
+                            </strong>
+                            <span className="block mt-1 text-green-700 font-semibold">
+                                Password → <code>Admin.MariaClara.clara@example.com</code>
+                            </span>
+                        </p>
+                        <input
+                            type="email"
+                            placeholder="Enter your email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="w-full mb-4 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <div className="flex justify-end gap-3">
                             <button
-                                type="button"
                                 onClick={() => setShowForgotPasswordModal(false)}
+                                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => {
+                                    resetPassword(email);
+                                    setShowForgotPasswordModal(false);
+                                }}
                                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-[#023047] transition"
                             >
-                                Close
+                                Reset Password
                             </button>
                         </div>
                     </div>

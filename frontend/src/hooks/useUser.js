@@ -75,7 +75,7 @@ export const useDeleteUser = () => {
             toast.success('User deleted successfully!');
         },
         onError: (error) => {
-            console.error('Error deleting user:', error);
+            //console.error('Error deleting user:', error);
             toast.success('Error deleting user!');
         },
     });
@@ -102,7 +102,22 @@ export const useUserLogs = (userId, filter) => {
         enabled: !!userId,  // Only run the query if userId is available
         retry: 1,  // Retry once in case of failure
         onError: (error) => {
-            console.error('Error fetching user logs:', error);
+            //console.error('Error fetching user logs:', error);
         }
     });
+};
+
+
+export const useResetPassword = () => {
+    const resetPasswordMutation = useMutation({
+        mutationFn: userApi.resetPassword,
+        onSuccess: (data) => {
+            toast.success('Password reset successfully! Please change your password immediately after logging in');
+        },
+        onError: (error) => {
+            toast.error(error.response?.data?.message || 'Failed to reset password.');
+        },
+    });
+
+    return { resetPassword: resetPasswordMutation.mutate, resetPasswordMutation };
 };

@@ -125,5 +125,18 @@ namespace BLWSDAI.Controllers
             return Ok(logs);
         }
 
+
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromQuery] string email)
+        {
+            var success = await _service.ResetPasswordToRoleNameEmailFormatAsync(email);
+            if (!success)
+                return NotFound(new { message = "User not found or unable to reset password." });
+
+            return Ok(new { message = "Password reset successfully." });
+        }
+
+
     }
 }

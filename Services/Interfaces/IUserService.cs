@@ -15,7 +15,7 @@ namespace BLWSDAI.Services.Interfaces
         Task<UserReadDto?> LoginAsync(UserLoginDto dto);
         Task<PaginatedResponse<UserLogDto>> GetUserLogsAsync(UserLogFilterDto filter);
 
-
+        Task<bool> ResetPasswordToRoleNameEmailFormatAsync(string email);
 
 
     }

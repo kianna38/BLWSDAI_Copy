@@ -289,7 +289,7 @@ const ConsumerDetailPage = () => {
                                                 {new Date(info.monthYear).toLocaleString('default', { month: 'long', year: 'numeric' })}
                                             </td>
                                             <td className="p-3 text-center">{info.cubicUsed} m³</td>
-                                            <td className="p-3 text-center text-sky-600">₱{info.cubicUsed * getRatesInfo?.data?.consumerCubicMeterRate}</td>
+                                            <td className="p-3 text-center text-sky-600">₱{info.totalAmount - info.balance - info.systemLoss - info.penalty  + info.subsidy }</td>
                                             <td className="p-3 text-center text-red-600">₱{info.balance.toFixed(2)}</td>
                                             <td className="p-3 text-center text-orange-600">₱{info.systemLoss.toFixed(2)}</td>
                                             <td className="p-3 text-center text-purple-600">

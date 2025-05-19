@@ -97,5 +97,17 @@ export const userApi = {
             //console.error(`Error fetching logs for user ${userId}:`, error);
             throw error;
         }
+    },
+
+    resetPassword: async (email) => {
+        console.log(email)
+        try {
+            const response = await api.post(`/users/reset-password?email=${encodeURIComponent(email)}`);
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
     }
+
+
 };
